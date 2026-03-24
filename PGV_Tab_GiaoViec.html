@@ -1,0 +1,451 @@
+<style>
+  /* --- 1. CẤU HÌNH CHUNG --- */
+  #gv_container { font-family: 'Times New Roman', Times, serif; font-size: 14px; }
+  
+  /* --- 2. HEADER TỐI ƯU --- */
+  #gv_container .header-container { 
+      display: flex; justify-content: space-between; align-items: center; 
+      margin-bottom: 5px; border-bottom: 2px solid #0d6efd; 
+      padding-bottom: 5px; background-color: #f8f9fa; padding: 10px; border-radius: 4px;
+  }
+  #gv_container .page-title { font-weight: bold; font-size: 20px; color: #dc3545; text-transform: uppercase; margin: 0; }
+  #gv_container .filter-group { display: flex; gap: 10px; align-items: center; }
+  
+  #gv_container .form-select-lg-custom {
+      font-size: 16px; font-weight: bold; color: #0d6efd;
+      border: 1px solid #ced4da; padding: 4px 10px; border-radius: 4px; height: 34px;
+  }
+
+  /* --- 3. TABLE CONTAINER --- */
+  #gv_container .table-container { background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 5px; }
+  #gv_container table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  #gv_container th { background-color: #0d6efd; color: white; text-align: center; padding: 8px 4px; border: 1px solid #dee2e6; vertical-align: middle; font-size: 13px; }
+  #gv_container td { border: 1px solid #999; padding: 0 !important; vertical-align: middle; }
+  
+  /* --- 4. TEXTAREA TỰ ĐỘNG GIÃN DÒNG --- */
+  #gv_taskTable textarea.form-control { 
+      font-family: 'Times New Roman', Times, serif; font-size: 14px;
+      border: none !important; border-radius: 0; box-shadow: none !important;
+      width: 100%; padding: 4px; margin: 0; background-color: transparent;
+      resize: none; overflow: hidden; min-height: 35px; line-height: 1.3; white-space: pre-wrap; box-sizing: border-box;
+  }
+  #gv_taskTable input.form-control, #gv_taskTable select.form-select {
+      font-family: 'Times New Roman', Times, serif; font-size: 14px;
+      border: none !important; box-shadow: none !important; width: 100%; height: 100%; padding: 4px; background-color: transparent;
+  }
+  #gv_container td.action-cell { text-align: center; padding: 2px !important; background-color: #f8f9fa; }
+  #gv_container .btn-add { margin-top: 5px; font-size: 13px; font-weight: bold; }
+  
+  /* --- 5. LOADING SCREEN --- */
+  #gv_loading { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(255,255,255,0.95); display: none; 
+      flex-direction: column; justify-content: center; align-items: center; z-index: 9999; 
+      backdrop-filter: blur(5px);
+  }
+
+  #gv_loading_msg {
+      margin-top: 20px; 
+      font-size: 22px; 
+      font-weight: 900; 
+      text-align: center; 
+      letter-spacing: 1.5px; 
+      text-transform: uppercase; 
+      background: linear-gradient(45deg, #0d6efd, #6610f2, #dc3545, #0d6efd);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.1); 
+      animation: gradientMove 3s ease infinite, pulseText 1.5s infinite ease-in-out;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+  }
+
+  @keyframes pulseText { 
+      0% { transform: scale(1); opacity: 0.8; } 
+      50% { transform: scale(1.05); opacity: 1; } 
+      100% { transform: scale(1); opacity: 0.8; } 
+  }
+
+  .spinner-border-lg {
+      width: 4rem;
+      height: 4rem;
+      border-width: 0.3em;
+  }
+
+  #gv_container select:disabled { background-color: #e9ecef !important; cursor: not-allowed; color: #6c757d; font-weight: bold; }
+</style>
+
+<div id="gv_container">
+    <div id="gv_loading">
+      <div class="spinner-border text-primary spinner-border-lg" role="status">
+        <span class="visually-hidden">Đang xử lý...</span>
+      </div>
+      <div id="gv_loading_msg">Đang xử lý...</div>
+    </div>
+
+    <div class="header-container">
+      <div class="page-title">PHIẾU GIAO NHIỆM VỤ</div>
+      <div class="filter-group">
+        <select id="gv_yearSelect" class="form-select form-select-lg-custom" style="width: 140px;">
+          <option value="2024-2025">2024-2025</option>
+          <option value="2025-2026" selected>2025-2026</option>
+          <option value="2026-2027">2026-2027</option>
+          <option value="2027-2028">2027-2028</option>
+          <option value="2028-2029">2028-2029</option>
+          <option value="2029-2030">2029-2030</option>
+        </select>
+        
+        <select id="gv_monthSelect" class="form-select form-select-lg-custom" style="width: 120px;">
+          <option value="Tháng 1">Tháng 1</option>
+          <option value="Tháng 2">Tháng 2</option>
+          <option value="Tháng 3">Tháng 3</option>
+          <option value="Tháng 4">Tháng 4</option>
+          <option value="Tháng 5">Tháng 5</option>
+          <option value="Tháng 6">Tháng 6</option>
+          <option value="Tháng 7">Tháng 7</option>
+          <option value="Tháng 8">Tháng 8</option>
+          <option value="Tháng 9">Tháng 9</option>
+          <option value="Tháng 10">Tháng 10</option>
+          <option value="Tháng 11">Tháng 11</option>
+          <option value="Tháng 12">Tháng 12</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="gv_taskTable">
+        <thead>
+          <tr>
+            <th style="width: 40px;">Xóa</th>
+            <th style="width: 40px;">STT</th>
+            <th style="width: 35%;">Nội dung công việc</th>
+            <th style="width: 120px;">Thời gian HT</th>
+            <th style="width: 130px;">Loại tiến độ</th>
+            <th style="width: 200px;">Người thực hiện</th>
+            <th style="width: 15%;">Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody id="gv_tableBody"></tbody>
+      </table>
+      <button class="btn btn-success btn-add" onclick="gv_addRow()">+ Thêm dòng mới</button>
+    </div>
+
+    <div class="modal fade" id="gv_deleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> CẢNH BÁO NGUY HIỂM</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="gv_cancelDelete()"></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <p class="fs-6 mb-3">Bạn đang chọn chức năng <strong>XÓA TOÀN BỘ DỮ LIỆU CŨ</strong>.</p>
+            <p class="text-danger fw-bold">Hành động này sẽ xóa sạch dữ liệu hiện tại và load lại mẫu từ file gốc.</p>
+            <p>Bạn có chắc chắn muốn thực hiện không?</p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" onclick="gv_cancelDelete()">Hủy bỏ</button>
+            <button type="button" class="btn btn-danger px-4 fw-bold" onclick="gv_confirmDeleteAction()">Đồng ý Xóa</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="gv_notifyModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+          <div class="modal-header text-white" id="gv_notifyHeader">
+            <h5 class="modal-title fw-bold" id="gv_notifyTitle">THÔNG BÁO</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <div id="gv_notifyIcon" class="mb-3" style="font-size: 3rem;"></div>
+            <p class="fs-6 fw-bold" id="gv_notifyMsg">...</p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+  let gv_staffData = [];
+  let gv_rowCounter = 1;
+  let gv_pendingDeletePayload = null;
+  let gv_pendingSelectElement = null;
+
+  setTimeout(function() { gv_loadStaff(); }, 500);
+
+  function gv_showNotify(type, message) {
+      const modalEl = document.getElementById('gv_notifyModal');
+      const header = document.getElementById('gv_notifyHeader');
+      const title = document.getElementById('gv_notifyTitle');
+      const msgEl = document.getElementById('gv_notifyMsg');
+      const iconEl = document.getElementById('gv_notifyIcon');
+      
+      header.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'text-dark', 'text-white');
+      msgEl.innerText = message;
+
+      if (type === 'success') {
+          header.classList.add('bg-success', 'text-white');
+          title.innerText = "THÀNH CÔNG";
+          iconEl.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+      } else if (type === 'error') {
+          header.classList.add('bg-danger', 'text-white');
+          title.innerText = "LỖI";
+          iconEl.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+      } else if (type === 'warning') {
+          header.classList.add('bg-warning', 'text-dark');
+          title.innerText = "CẢNH BÁO";
+          iconEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+          header.classList.remove('text-white'); 
+          header.querySelector('.btn-close').classList.remove('btn-close-white');
+      } else {
+          header.classList.add('bg-primary', 'text-white');
+          title.innerText = "THÔNG BÁO";
+          iconEl.innerHTML = '<i class="bi bi-info-circle-fill text-primary"></i>';
+      }
+
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+  }
+
+  function gv_setLoading(isLoading, customMsg = null) {
+      const loader = document.getElementById('gv_loading');
+      const msgEl = document.getElementById('gv_loading_msg');
+      const spinner = loader.querySelector('.spinner-border');
+      
+      if (isLoading) {
+          msgEl.innerText = customMsg || "Đang xử lý...";
+          
+          if (customMsg && (customMsg.toLowerCase().includes("nhiệm vụ chung") || customMsg.toLowerCase().includes("dọn") || customMsg.toLowerCase().includes("chuyển"))) {
+              msgEl.style.backgroundImage = "linear-gradient(45deg, #dc3545, #fd7e14, #ffc107, #dc3545)";
+              spinner.className = "spinner-border text-danger spinner-border-lg"; 
+          } else {
+              msgEl.style.backgroundImage = "linear-gradient(45deg, #0d6efd, #6610f2, #dc3545, #0d6efd)";
+              spinner.className = "spinner-border text-primary spinner-border-lg"; 
+          }
+          loader.style.display = 'flex';
+      } else {
+          loader.style.display = 'none';
+      }
+  }
+
+  /* --- CẬP NHẬT: SỬ DỤNG SERVER API ĐỂ TẢI NHÂN SỰ --- */
+  function gv_loadStaff() {
+    gv_setLoading(true, "Đang tải danh sách nhân sự (để giao việc)...");
+    ServerAPI.getStaffList(function(data) {
+      gv_staffData = data;
+      gv_loadInitialData(); 
+    }, function(err) {
+      gv_showNotify('error', "Lỗi tải nhân sự: " + err.message);
+      gv_setLoading(false);
+    });
+  }
+
+  /* --- CẬP NHẬT: SỬ DỤNG SERVER API --- */
+  function gv_loadInitialData() {
+    gv_setLoading(true, "✨ Đang cập nhật nhiệm vụ mới ✨");
+    ServerAPI.getInitialGiaoViecData(gv_onSuccessLoad, function(err) {
+      gv_showNotify('error', "Lỗi tải dữ liệu: " + err.message);
+      gv_setLoading(false);
+    });
+  }
+
+  function gv_onSuccessLoad(data) {
+    gv_setLoading(false);
+    if(data.year) document.getElementById('gv_yearSelect').value = data.year;
+    if(data.month) document.getElementById('gv_monthSelect').value = data.month;
+
+    const tasks = data.tasks;
+    const tbody = document.getElementById('gv_tableBody');
+    tbody.innerHTML = ""; 
+    gv_rowCounter = 1; 
+
+    if (tasks && tasks.length > 0) {
+      tasks.forEach(rowData => { gv_renderRow(rowData); });
+      const lastRowSTT = parseInt(tasks[tasks.length - 1][0]);
+      if (!isNaN(lastRowSTT)) { gv_rowCounter = lastRowSTT + 1; }
+      setTimeout(() => { document.querySelectorAll('#gv_container textarea.form-control').forEach(el => gv_autoResize(el)); }, 200);
+    } else {
+      gv_renderRow(); 
+    }
+  }
+
+  function gv_renderRow(data = null) {
+    const tbody = document.getElementById('gv_tableBody');
+    const tr = document.createElement('tr');
+    
+    let currentAssignee = (data && data[4]) ? data[4] : "";
+    let currentAssigneeUpper = currentAssignee.toUpperCase();
+    let isDisabled = (data && currentAssignee !== "") ? "disabled" : "";
+
+    let deleteBtnHtml = data 
+        ? `<i class="bi bi-lock-fill text-secondary" title="Đã lưu, không thể xoá"></i>`
+        : `<button class="btn btn-danger btn-sm p-0" style="width:24px; height:24px; line-height:20px;" onclick="gv_removeRow(this)">X</button>`;
+
+    let staffOptions = `<option value="">--Chọn--</option>`;
+    if (!isDisabled || currentAssigneeUpper === 'ALL') {
+      let isAllSelected = (currentAssigneeUpper === 'ALL') ? "selected" : "";
+      staffOptions += `<option value="ALL" style="font-weight:bold; color:blue;" ${isAllSelected}>-TOÀN TRƯỜNG-</option>`;
+    }
+    if (!isDisabled) {
+      staffOptions += `<option value="DELETE" style="font-weight:bold; color:red;">-CHUYỂN THÁNG MỚI-</option>`;
+    }
+    gv_staffData.forEach(s => {
+      let isSelected = (currentAssignee === s.sheetName) ? "selected" : "";
+      staffOptions += `<option value="${s.sheetName}" data-name="${s.name}" ${isSelected}>${s.name}</option>`;
+    });
+
+    let valSTT = gv_rowCounter;
+    let valContent = "", valDate = "", valProgress = "", valNote = "";
+
+    if (data) {
+      valSTT = data[0]; 
+      valContent = data[1] || "";
+      valDate = data[2] || "";
+      valProgress = data[3] || "";
+      valNote = data[5] || ""; 
+      gv_rowCounter = parseInt(valSTT) + 1;
+    } else {
+      gv_rowCounter++;
+    }
+
+    const selVuot = (valProgress === "Cho vượt tiến độ") ? "selected" : "";
+
+    tr.innerHTML = `
+      <td class="action-cell">${deleteBtnHtml}</td>
+      <td class="text-center"><input type="text" class="form-control text-center stt-cell" value="${valSTT}" readonly></td>
+      <td><textarea class="form-control content-cell" placeholder="Nhập nội dung..." oninput="gv_autoResize(this)">${valContent}</textarea></td>
+      <td><textarea class="form-control text-center date-cell" placeholder="dd/mm/yyyy" oninput="gv_autoResize(this)">${valDate}</textarea></td>
+      <td>
+        <select class="form-select progress-cell">
+          <option value="">--Chọn--</option>
+          <option value="Cho vượt tiến độ" ${selVuot}>Cho vượt tiến độ</option>
+        </select>
+      </td>
+      <td>
+        <select class="form-select assignee-cell" onchange="gv_handleAssignChange(this)" ${isDisabled}>${staffOptions}</select>
+      </td>
+      <td><textarea class="form-control text-center note-cell" placeholder="Ghi chú" oninput="gv_autoResize(this)">${valNote}</textarea></td>
+    `;
+    tbody.appendChild(tr);
+  }
+  
+  function gv_autoResize(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
+  
+  function gv_addRow() { 
+      const currentRows = document.querySelectorAll('#gv_tableBody tr').length;
+      gv_rowCounter = currentRows + 1;
+      gv_renderRow(null); 
+  }
+
+  function gv_removeRow(btn) { btn.closest('tr').remove(); gv_reindexSTT(); }
+  function gv_reindexSTT() {
+    const rows = document.querySelectorAll('#gv_tableBody tr');
+    let tempCounter = 1;
+    rows.forEach(row => { row.querySelector('.stt-cell').value = tempCounter++; });
+    gv_rowCounter = tempCounter;
+  }
+
+  function gv_handleAssignChange(selectElement) {
+    const row = selectElement.closest('tr');
+    const content = row.querySelector('.content-cell').value.trim();
+    
+    if (!content) {
+      gv_showNotify('warning', "Nội dung công việc không được để trống!");
+      selectElement.value = ""; return;
+    }
+
+    const selectedValue = selectElement.value;
+    if (!selectedValue) return;
+
+    const selectedValueUpper = selectedValue.toUpperCase();
+    const year = document.getElementById('gv_yearSelect').value;
+    const month = document.getElementById('gv_monthSelect').value;
+    
+    let assigneeName = "";
+    if (selectedValueUpper !== 'DELETE' && selectedValueUpper !== 'ALL') {
+      assigneeName = selectElement.options[selectElement.selectedIndex].getAttribute('data-name');
+    }
+
+    const taskPayload = {
+      stt: row.querySelector('.stt-cell').value,
+      content: content,
+      deadline: row.querySelector('.date-cell').value,
+      progress: row.querySelector('.progress-cell').value,
+      note: row.querySelector('.note-cell').value,
+      assignee: selectedValue, 
+      assigneeSheet: selectedValue,
+      assigneeName: assigneeName
+    };
+
+    if (selectedValueUpper === 'DELETE') {
+        gv_pendingDeletePayload = { year: year, month: month, task: taskPayload };
+        gv_pendingSelectElement = selectElement;
+        const myModal = new bootstrap.Modal(document.getElementById('gv_deleteModal'));
+        myModal.show();
+        return; 
+    }
+
+    let displayMsg = "Đang giao việc...";
+    if (selectedValueUpper === 'ALL') {
+        displayMsg = "🚀 Đang giao cho TOÀN TRƯỜNG 🚀";
+    } else {
+        displayMsg = "⏳ Đang gửi cho " + assigneeName + "...";
+    }
+    
+    gv_setLoading(true, displayMsg);
+    gv_executeServerCall(year, month, taskPayload, selectElement, selectedValueUpper);
+  }
+
+  function gv_confirmDeleteAction() {
+      const modalEl = document.getElementById('gv_deleteModal');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
+
+      if (gv_pendingDeletePayload && gv_pendingSelectElement) {
+          const { year, month, task } = gv_pendingDeletePayload;
+          const msg = `🧹 Đang làm sạch dữ liệu cũ và chuyển sang ${month}`;
+          gv_setLoading(true, msg);
+          gv_executeServerCall(year, month, task, gv_pendingSelectElement, 'DELETE');
+      }
+  }
+
+  function gv_cancelDelete() {
+      if (gv_pendingSelectElement) { gv_pendingSelectElement.value = ""; }
+      gv_pendingDeletePayload = null;
+      gv_pendingSelectElement = null;
+  }
+
+  /* --- CẬP NHẬT: SỬ DỤNG SERVER API --- */
+  function gv_executeServerCall(year, month, taskPayload, selectElement, type) {
+    ServerAPI.processTaskAssignment({ year: year, month: month, task: taskPayload }, function(res) {
+        gv_setLoading(false);
+        if (res && res.status === 'success') {
+          selectElement.style.backgroundColor = '#d1e7dd'; 
+          selectElement.style.borderColor = '#badbcc';
+          selectElement.style.fontWeight = 'bold';
+          
+          if (type === 'DELETE') { 
+              gv_pendingDeletePayload = null; 
+              gv_pendingSelectElement = null;
+              setTimeout(gv_loadInitialData, 1000); 
+          }
+        } else {
+          gv_showNotify('error', "Lỗi Server: " + (res ? res.message : "Unkown error"));
+          selectElement.value = "";
+        }
+    }, function(err) {
+        gv_setLoading(false);
+        gv_showNotify('error', "Lỗi kết nối: " + err.message);
+    });
+  }
+</script>

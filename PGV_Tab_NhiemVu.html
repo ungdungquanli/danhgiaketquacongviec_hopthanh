@@ -1,0 +1,593 @@
+<style>
+  /* --- 1. CSS CẤU TRÚC GỌN GÀNG --- */
+  .header-box { background-color: #e9ecef; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; border: 1px solid #ced4da; }
+  .logo { font-weight: bold; color: #0d6efd; text-transform: uppercase; font-size: 14px; }
+  .title { font-weight: bold; color: #dc3545; font-size: 20px; text-align: center; text-transform: uppercase; margin: 0; }
+  .label-task-lg { font-weight: bold; color: #333; font-size: 14px; }
+  .text-info-lg { font-weight: bold; color: #0d6efd; font-size: 15px; margin-left: 5px; }
+  .custom-input { border: 1px solid #ced4da; border-radius: 4px; padding: 2px; outline: none; height: 30px; font-size: 14px; }
+  .force-one-line { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+
+  #taskTable thead th { position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important; vertical-align: middle; text-align: center; padding: 8px 5px; }
+  #taskTable textarea.form-control { border: none; background-color: transparent; resize: none; overflow: hidden; min-height: 35px; line-height: 1.3; white-space: pre-wrap; padding: 4px; box-shadow: none; cursor: default; }
+  #taskTable .date-input, #taskTable .result-select { border: none; background: transparent; box-shadow: none; width: 100%; text-align: center; height: 30px; }
+  #taskTable td { vertical-align: middle !important; padding: 1px 2px !important; border-color: #f2f2f2 !important; }
+
+  /* --- 2. MÀU SẮC ĐIỂM SỐ --- */
+  .score-positive, .score-positive:disabled { background-color: #0d6efd !important; color: white !important; font-weight: bold; opacity: 1 !important; -webkit-text-fill-color: white !important; }
+  .score-negative, .score-negative:disabled { background-color: #dc3545 !important; color: white !important; font-weight: bold; opacity: 1 !important; -webkit-text-fill-color: white !important; }
+  .score-zero, .score-zero:disabled { background-color: #28a745 !important; color: black !important; font-weight: bold; opacity: 1 !important; -webkit-text-fill-color: black !important; }
+
+  /* --- 3. MÀN HÌNH CHỜ --- */
+  #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
+  .spinner-ring { width: 60px; height: 60px; border: 5px solid rgba(0, 0, 0, 0.1); border-left-color: #0d6efd; border-top-color: #dc3545; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  .loading-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(45deg, #0d6efd, #6610f2, #dc3545, #0d6efd); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 3s ease infinite; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  button:disabled { cursor: not-allowed !important; opacity: 0.5 !important; filter: grayscale(100%) !important; pointer-events: none !important; box-shadow: none !important; }
+
+  /* --- 4. MÀU SẮC TIẾN ĐỘ --- */
+  tr.bg-early, tr.bg-early td { background-color: #d1e7dd !important; }
+  tr.bg-today, tr.bg-today td { background-color: #cfe2ff !important; }
+  tr.bg-late,  tr.bg-late  td { background-color: #fff3cd !important; }
+</style>
+
+<div id="loading-overlay" style="display: none; opacity: 0;">
+  <div class="spinner-ring"></div>
+  <div class="loading-text" id="loading-msg">Đang cập nhật số liệu mới nhất...</div>
+</div>
+
+<div class="header-box">
+  <div class="row align-items-center mb-1">
+    <div class="col-md-3 logo text-start">TRƯỜNG TH HỢP THÀNH</div>
+    <div class="col-md-6 title text-center">NHIỆM VỤ CỦA TÔI</div>
+    <div class="col-md-3 ps-3 text-nowrap text-end"> 
+      <div class="d-inline-block">
+        <label class="me-1 fw-bold label-task-lg" style="font-size:13px;">Điểm cộng/trừ:</label>
+        <input type="number" id="inpBonus" oninput="liveUpdateScore()" class="custom-input text-center fw-bold score-zero" style="width: 50px; display:inline-block;" value="0">
+      </div>
+    </div>
+  </div>
+  
+  <div class="d-flex align-items-center mb-1 px-2 py-1" style="background-color: #fff; border-radius: 4px; border: 1px dashed #ccc;">
+    <div class="d-flex align-items-center text-nowrap overflow-hidden">
+      <span class="label-task-lg me-2">Giáo viên:</span> 
+      <span id="txtTeacherName" class="text-info-lg text-uppercase fw-bold">...</span>
+      <span class="border-start ps-3 ms-2" style="height: 16px;"></span>
+      <span id="txtStatus" class="fw-bold text-uppercase small text-nowrap" style="color: #0044cc;">...</span>
+    </div>
+    <div class="ms-auto d-flex align-items-center text-nowrap">
+      <span class="label-task-lg">Thời gian:</span> 
+      <span id="txtTime" class="text-info-lg me-3">...</span>
+      <span class="label-task-lg border-start ps-3">Năm học:</span> 
+      <span id="txtYear" class="text-info-lg">...</span>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center mb-2 px-2 py-1 gap-2" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; min-height: 42px;">
+     <div class="d-flex align-items-center text-nowrap overflow-hidden" style="flex: 2.5;">
+        <span class="label-task-lg me-2">Kết quả:</span>
+        <span id="txtResultDisplay" class="fw-bold text-danger force-one-line">...</span>
+     </div>
+     <div class="d-flex align-items-center justify-content-center px-3" style="flex: 4; border-left: 1px solid #ccc; border-right: 1px solid #ccc;">
+         <span class="label-task-lg me-2 text-nowrap">Số ngày nghỉ:</span>
+         <input type="number" id="inpDaysOff" class="custom-input text-center me-2" style="width: 45px; font-weight: bold;" placeholder="0">
+         <textarea id="inpReason" class="form-control" placeholder="Nhập lý do..." style="height: 30px; min-height: 30px; font-size: 13px; border-radius: 4px; width: 100%; resize: none; overflow: hidden; white-space: pre-wrap; padding: 4px 8px;" oninput="expandTextarea(this)" onfocus="expandTextarea(this)" onblur="shrinkTextarea(this, '30px')"></textarea>
+     </div>
+     <div class="d-flex align-items-center justify-content-end gap-2" style="flex: 3.5; overflow: hidden;">
+        <select id="cbSheetSelect" class="form-select form-select-sm border-primary fw-bold text-primary shadow-sm" style="width: auto; max-width: 180px; display: none; height: 30px; font-size: 12px;" disabled>
+            <option value="">-- GV --</option>
+        </select>
+        <button class="btn btn-success btn-sm fw-bold d-flex align-items-center px-3" onclick="handleSaveTemp()" style="height: 30px; min-width: 80px; justify-content: center;">
+            <i class="bi bi-save me-1"></i> Lưu nhật ký
+        </button>
+        <button id="btnSubmitReport" class="btn btn-primary btn-sm fw-bold d-flex align-items-center px-3" onclick="submitReport()" disabled style="height: 30px; min-width: 80px; justify-content: center;">
+            <i class="bi bi-send me-1"></i> Nộp báo cáo
+        </button>
+     </div>
+  </div>
+    
+  <div class="row g-1 mb-1">
+    <div class="col-md-6">
+      <textarea id="txtPetition" class="form-control border-danger" placeholder="* Ý kiến tham mưu, đề xuất..." style="height: 45px; min-height: 45px; overflow-y: hidden; resize: none; font-size: 13px; border: 1px dashed #dc3545; padding: 3px; border-radius: 4px;" oninput="expandTextarea(this)" onfocus="expandTextarea(this)" onblur="shrinkTextarea(this, '45px')"></textarea>
+    </div>
+    
+    <div class="col-md-6">
+      <div style="position: relative;">
+        <textarea id="txtReport" class="form-control border-danger" placeholder="* Báo cáo tóm tắt quá trình thực hiện..." style="height: 45px; min-height: 45px; overflow-y: hidden; resize: none; font-size: 13px; border: 1px dashed #dc3545; padding: 3px 30px 3px 3px; border-radius: 4px;" oninput="expandTextarea(this)" onfocus="expandTextarea(this)" onblur="shrinkTextarea(this, '45px')"></textarea>
+        
+        <button class="btn btn-sm text-primary" onclick="document.getElementById('fileReport').click()" style="position: absolute; top: 2px; right: 4px; padding: 0; background: transparent; border: none; z-index: 10;" title="Đính kèm báo cáo">
+          <i class="bi bi-paperclip" style="font-size: 18px;"></i>
+        </button>
+        <input type="file" id="fileReport" multiple style="display:none;" onchange="handleReportUpload(this)">
+      </div>
+      
+      <div id="reportAttachments" class="mt-1 d-flex gap-1 flex-wrap justify-content-end"></div>
+    </div>
+    
+  </div>
+</div>
+
+<div class="card shadow-sm p-0 border-0">
+  <div class="table-responsive" style="max-height: 65vh; overflow-y: auto; border: 1px solid #f0f0f0;">
+    <table class="table table-bordered table-hover mb-0" id="taskTable">
+      <thead>
+        <tr>
+          <th style="width: 3%;">STT</th>
+          <th style="width: 48%;">Nội dung công việc</th>
+          <th style="width: 15%;">Thời gian giao hoàn thành</th>
+          <th style="width: 10%;">Loại tiến độ</th>
+          <th style="width: 10%;">Kết quả</th>
+          <th style="width: 10%;">Ngày hoàn thành</th>
+          <th style="width: 3%;">Xoá</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="p-2 text-start bg-light border-top">
+    <button class="btn btn-sm btn-outline-primary fw-bold" onclick="addNewRow()">
+      <i class="bi bi-plus-circle"></i> Thêm nhiệm vụ
+    </button>
+  </div>
+</div>
+
+<script>
+let isReportUnlocked = false;
+
+function showLoading(msg) {
+    const loader = document.getElementById('loading-overlay');
+    const txt = document.getElementById('loading-msg');
+    if(txt) txt.innerText = msg;
+    if(loader) { loader.style.display = 'flex'; setTimeout(() => { loader.style.opacity = '1'; }, 10); }
+}
+
+function hideLoading() {
+    const loader = document.getElementById('loading-overlay');
+    if(loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; }, 300); }
+}
+
+function expandTextarea(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+function shrinkTextarea(el, defaultHeight) { el.style.height = defaultHeight; el.scrollTop = 0; }
+
+function encodeReportText(text, attachments) {
+    let res = (text || "").trim();
+    if (attachments && attachments.length > 0) {
+        attachments.forEach(a => { res += ` [FILE:${a.name}|${a.url}]`; });
+    }
+    return res;
+}
+
+function handleReportUpload(input) {
+    if (!input.files || input.files.length === 0) return;
+    showLoading("⏳ Đang tải lên " + input.files.length + " file đính kèm...");
+    
+    let filesData = [];
+    let count = 0;
+    
+    Array.from(input.files).forEach(file => {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            filesData.push({ fileName: file.name, mimeType: file.type, data: e.target.result.split(',')[1] });
+            count++;
+            
+            if (count === input.files.length) {
+                const payload = { files: filesData };
+                if (typeof ServerAPI.uploadReportFiles === 'function') {
+                    ServerAPI.uploadReportFiles(payload, function(res) {
+                        hideLoading();
+                        input.value = ""; 
+                        if ((res && Array.isArray(res)) || (res && res.status === 'success')) {
+                            let uploadedFiles = Array.isArray(res) ? res : res.data;
+                            if(!window.currentReportAttachments) window.currentReportAttachments = [];
+                            window.currentReportAttachments = window.currentReportAttachments.concat(uploadedFiles);
+                            renderReportAttachmentsUI();
+                            
+                            // Gọi lưu tự động để kẹp file lên Sheet liền tay
+                            handleSaveTemp(true, function() {
+                                showPopup('success', 'Đã đính kèm thành công ' + filesData.length + ' file!');
+                            });
+                        } else {
+                            let errMsg = (res && res.message) ? res.message : "Lỗi không xác định từ máy chủ.";
+                            showPopup('error', "Lỗi tải file: " + errMsg);
+                        }
+                    }, function(err) {
+                        hideLoading(); input.value = ""; showPopup('error', "Lỗi kết nối Server: " + err.message);
+                    });
+                } else {
+                    hideLoading(); showPopup('error', "Lỗi API: Cần bổ sung hàm uploadReportFiles vào ketnoi.js!");
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function renderReportAttachmentsUI() {
+    let container = $('#reportAttachments');
+    container.empty();
+    
+    if(!window.currentReportAttachments || window.currentReportAttachments.length === 0) return;
+    
+    window.currentReportAttachments.forEach((a, idx) => {
+        let badge = $(`<span class="badge bg-info text-dark shadow-sm" style="font-size: 12px; cursor: pointer; border: 1px solid #90caf9; padding: 4px 6px;" title="${a.name}">
+            <i class="bi bi-paperclip"></i> Báo cáo ${idx + 1}
+            <i class="bi bi-x text-danger fw-bold ms-1" style="font-size: 15px;" onclick="removeReportAttachment(${idx}); event.stopPropagation();" title="Xóa đính kèm này khỏi hệ thống"></i>
+        </span>`);
+        badge.on('click', function() { window.open(a.url, '_blank'); });
+        container.append(badge);
+    });
+}
+
+// CẬP NHẬT: Logic Xóa file (Đồng thời xóa trên Drive và xóa link ô F2 bằng cách lưu lại)
+function removeReportAttachment(idx) {
+    const confirmMsg = "Thầy/Cô có chắc chắn muốn xóa file đính kèm này khỏi hệ thống báo cáo không?";
+    if (typeof showPopup === 'function') {
+        showPopup('confirm', confirmMsg, function() { executeDeleteAttachment(idx); });
+    } else {
+        if (confirm(confirmMsg)) executeDeleteAttachment(idx);
+    }
+}
+
+function executeDeleteAttachment(idx) {
+    let fileToDelete = window.currentReportAttachments[idx];
+    showLoading("⏳ Đang xóa file khỏi hệ thống...");
+    
+    if (typeof ServerAPI.deleteReportFile === 'function') {
+        ServerAPI.deleteReportFile({ url: fileToDelete.url }, function(res) {
+            if (res && res.status === 'success') {
+                window.currentReportAttachments.splice(idx, 1);
+                renderReportAttachmentsUI();
+                
+                // Xóa xong file trên Drive -> Ghi đè cập nhật lại F2 (Loại bỏ link đã xóa)
+                handleSaveTemp(true, function() {
+                    hideLoading();
+                    showPopup('success', 'Đã xóa file đính kèm thành công!');
+                });
+            } else {
+                hideLoading(); showPopup('error', "Lỗi xóa file: " + (res.message || "Không xác định"));
+            }
+        }, function(err) { hideLoading(); showPopup('error', "Lỗi kết nối Server: " + err.message); });
+    } else {
+        hideLoading(); showPopup('error', "Lỗi API: Cần bổ sung hàm deleteReportFile vào ketnoi.js!");
+    }
+}
+
+function handleSaveTemp(isSilent = false, onSuccessCallback = null) {
+    const btnSave = document.querySelector('button[onclick="handleSaveTemp()"]');
+    if(btnSave && !isSilent) btnSave.disabled = true;
+
+    if(!isSilent) showLoading("✨ Đang ghi nhớ kết quả...");
+    
+    let tableData = [];
+    $('#taskTable tbody tr').each(function() {
+        if ($(this).find('td').length > 1) {
+            let rs = $(this).find('.result-select').val() || "";
+            let dt = $(this).find('.date-input').val() || "";
+            let content = $(this).find('.content-input').val() || "";
+            let deadline = "";
+            let progressType = "";
+            
+            if ($(this).attr('data-is-new') === "true") {
+                deadline = $(this).find('.deadline-input').val() || "";
+                progressType = $(this).find('.progress-input').val() || "";
+            } else {
+                deadline = $(this).attr('data-deadline') || "";
+                progressType = $(this).attr('data-type') || "";
+            }
+            tableData.push(["", content, deadline, progressType, rs, dt]);
+        }
+    });
+
+    let resultEl = $('#txtResultDisplay');
+    let resultString = resultEl.is('input, select, textarea') ? resultEl.val() : resultEl.text();
+    resultString = resultString ? resultString.trim() : "";
+
+    const payload = {
+        sheetName: currentUser.user.sheetName,
+        daysOff: $('#inpDaysOff').val() || 0,
+        bonusPoint: $('#inpBonus').val() || 0,
+        reason: $('#inpReason').val() || "",
+        petition: $('#txtPetition').val() || "",
+        report: encodeReportText($('#txtReport').val() || "", window.currentReportAttachments), 
+        tableData: tableData,
+        resultString: resultString
+    };
+
+    ServerAPI.saveTempData(payload, function(res) {
+        if(!isSilent) hideLoading();
+        if(btnSave && !isSilent) btnSave.disabled = false; 
+        if(typeof unlockSubmitButton === 'function') unlockSubmitButton();
+
+        if (res && res.status === 'success') {
+            if (!isSilent) {
+                if (typeof showPopup === 'function') showPopup('success', "Đã ghi nhớ kết quả thành công!");
+                else alert("Đã ghi nhớ kết quả thành công!");
+            }
+            if(onSuccessCallback) onSuccessCallback();
+        } else {
+            let errMsg = res ? res.message : "Unknown error";
+            if (typeof showPopup === 'function') showPopup('error', "Lỗi lưu: " + errMsg);
+            else alert("Lỗi lưu: " + errMsg);
+        }
+    }, function(err) {
+        if(!isSilent) hideLoading();
+        if(btnSave && !isSilent) btnSave.disabled = false; 
+        if (typeof showPopup === 'function') showPopup('error', "Lỗi Server: " + err.message);
+        else alert("Lỗi Server: " + err.message);
+    });
+}
+
+function submitReport() {
+    const valDays = parseInt($('#inpDaysOff').val()) || 0,
+      valReason = $('#inpReason').val().trim();
+
+    if (valDays > 0 && valReason === "") {
+      showPopup('warning', `Bạn đã có ${valDays} ngày nghỉ.\nPhải nhập lý do!`, () => setTimeout(() => $('#inpReason').focus(), 500));
+      return;
+    }
+    const valPetition = $('#txtPetition').val().trim(),
+      valReport = $('#txtReport').val().trim();
+
+    if (valPetition === "" || valReport === "") {
+      showPopup('error', "Thiếu: Ý kiến tham mưu hoặc Báo cáo tóm tắt");
+      return;
+    }
+
+    let isTableValid = true;
+    $('#taskTable tbody tr').each(function(index) {
+      if ($(this).find('td').length < 2) return;
+      if (!$(this).find('.result-select').val() || !$(this).find('.date-input').val()) {
+        showPopup('error', `Dòng ${index + 1} chưa xong.\nChọn Kết quả và Ngày hoàn thành!`);
+        isTableValid = false;
+        return false;
+      }
+    });
+    if (!isTableValid) return;
+
+    showPopup('confirm', "Hệ thống sẽ đồng bộ nhật ký và nộp báo cáo. Xác nhận?", function() {
+      const btnSubmit = document.getElementById('btnSubmitReport');
+      if(btnSubmit) btnSubmit.disabled = true;
+
+      const monthCurrent = $('#txtTime').text(); 
+      setLoading(true, "🚀 Bước 1: Đang lưu vào nhật ký cá nhân...");
+
+      handleSaveTemp(true, function() {
+          setLoading(true, "🚀 Bước 2: Đang ghi vào dữ liệu tổng...");
+
+          let resultEl = $('#txtResultDisplay');
+          let resultString = resultEl.is('input, select, textarea') ? resultEl.val() : resultEl.text();
+          resultString = resultString ? resultString.trim() : "";
+
+          const finalDataToSubmit = {
+            sheetName: currentUser.user.sheetName,
+            name: currentUser.header.name,
+            daysOff: $('#inpDaysOff').val(),
+            schoolYear: currentUser.header.schoolYear,
+            time: currentUser.header.time,
+            result: resultString, 
+            bonusPoint: $('#inpBonus').val(),
+            petition: $('#txtPetition').val(),
+            report: encodeReportText($('#txtReport').val() || "", window.currentReportAttachments),
+            reason: $('#inpReason').val(),
+            clientEmail: window.PGV_GLOBAL_EMAIL 
+          };
+
+          setLoading(true, "🚀 Bước 3: Thực hiện nộp báo cáo " + finalDataToSubmit.time);
+
+          ServerAPI.submitReport(finalDataToSubmit, function(resSubmit) {
+            setLoading(false);
+            if(btnSubmit) btnSubmit.disabled = false; 
+
+            if (resSubmit && resSubmit.status === 'success') {
+              $('#txtStatus').text("Đã nộp báo cáo");
+              let msgFinal = (resSubmit.isUpdate === true) ? 
+                  "Đã nộp lại kết quả mới nhất của " + finalDataToSubmit.time : 
+                  "Đã nộp xong kết quả " + finalDataToSubmit.time;
+              showPopup('success', msgFinal);
+              
+              if(typeof loadInitialData === 'function') loadInitialData(); 
+              if(typeof forceLockSubmitButton === 'function') forceLockSubmitButton();
+            } else {
+              showPopup('error', "Lỗi nộp báo cáo: " + (resSubmit ? resSubmit.message : "Unknown error"));
+            }
+          }, function(err) { 
+              if(btnSubmit) btnSubmit.disabled = false; 
+              if(typeof onServerFail === 'function') onServerFail(err); 
+          });
+      });
+    });
+}
+
+function unlockSubmitButton() {
+    isReportUnlocked = true;
+    const btn = document.getElementById('btnSubmitReport');
+    if(btn) { btn.disabled = false; btn.style.transition = "transform 0.2s"; btn.style.transform = "scale(1.1)"; setTimeout(() => btn.style.transform = "scale(1)", 200); }
+}
+
+function forceLockSubmitButton() {
+    if (!isReportUnlocked) { const btn = document.getElementById('btnSubmitReport'); if(btn) btn.disabled = true; }
+}
+
+function renderTaskTable(data) {
+    forceLockSubmitButton();
+    const tbody = $('#taskTable tbody').empty();
+    
+    if (!data || data.length === 0) { tbody.append('<tr><td colspan="7" class="text-center text-muted py-3 small">Chưa có nhiệm vụ.</td></tr>'); tinhToanTuDong(); return; }
+
+    let isAdmin = (typeof currentUser !== 'undefined' && currentUser.canSelectUser === true);
+
+    data.forEach((row, idx) => {
+        let stt = idx + 1;
+        let content = row[1] ? String(row[1]) : ""; 
+        let deadline = row[2] || ""; 
+        let progressType = row[3] || ""; 
+        let resultVal = row[4] || ""; 
+        let rawFinish = row[5];
+        let finishDate = formatDateDisplay(rawFinish);
+        let formattedDeadline = formatDateDisplay(deadline);
+        let deleteBtnHtml = isAdmin ? `<button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteRow(this)" title="Xoá dòng (Quyền Admin)">✕</button>` : ``;
+
+        let tr = `<tr class="task-row" data-deadline="${formattedDeadline}" data-type="${progressType}" data-is-new="false">
+            <td class="text-center align-middle stt-cell">${stt}</td>
+            <td><textarea class="form-control content-input" readonly oninput="autoResizeInfo(this)" onfocus="autoResizeInfo(this)" rows="1">${content}</textarea></td>
+            <td class="text-center align-middle">${formattedDeadline}</td>
+            <td class="text-center align-middle">${progressType}</td>
+            <td class="align-middle">
+                <select class="form-select form-select-sm result-select shadow-sm" onchange="tinhToanTuDong()" style="border:none; font-size:13px;">
+                    <option value="">-- Chọn --</option>
+                    <option value="Chất lượng đạt yêu cầu" ${resultVal === 'Chất lượng đạt yêu cầu' ? 'selected' : ''}>Đạt yêu cầu</option>
+                    <option value="Chất lượng chưa đạt yêu cầu" ${resultVal === 'Chất lượng chưa đạt yêu cầu' ? 'selected' : ''}>Chưa đạt</option>
+                </select>
+            </td>
+            <td class="align-middle">
+                <input type="text" class="form-control form-control-sm date-input shadow-sm text-center" onchange="tinhToanTuDong()" onkeyup="tinhToanTuDong()" value="${finishDate}" placeholder="dd/mm/yyyy" style="font-size:13px;">
+            </td>
+            <td class="text-center align-middle">${deleteBtnHtml}</td>
+        </tr>`;
+        tbody.append(tr);
+    });
+    setTimeout(() => { $('#taskTable textarea').each(function() { autoResizeInfo(this); }); tinhToanTuDong(); forceLockSubmitButton(); }, 300);
+}
+
+function autoResizeInfo(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
+
+function addNewRow() {
+    const tbody = $('#taskTable tbody');
+    if (tbody.find('tr td').length === 1 && tbody.find('tr td').attr('colspan') == '7') { tbody.empty(); }
+    let stt = tbody.find('tr.task-row').length + 1;
+    let tr = `<tr class="task-row" data-deadline="" data-type="" data-is-new="true">
+        <td class="text-center align-middle stt-cell">${stt}</td>
+        <td><textarea class="form-control content-input" oninput="autoResizeInfo(this)" rows="1" placeholder="Nhập nội dung..."></textarea></td>
+        <td class="align-middle"><input type="text" class="form-control form-control-sm deadline-input text-center" placeholder="dd/mm/yyyy" onchange="updateRowData(this)"></td>
+        <td class="align-middle"><input type="text" class="form-control form-control-sm progress-input text-center" placeholder="Loại tiến độ..." onchange="updateRowData(this)"></td>
+        <td class="align-middle">
+            <select class="form-select form-select-sm result-select shadow-sm" onchange="tinhToanTuDong()" style="border:none; font-size:13px;">
+                <option value="">-- Chọn --</option>
+                <option value="Chất lượng đạt yêu cầu">Đạt yêu cầu</option>
+                <option value="Chất lượng chưa đạt yêu cầu">Chưa đạt</option>
+            </select>
+        </td>
+        <td class="align-middle">
+            <input type="text" class="form-control form-control-sm date-input shadow-sm text-center" onchange="tinhToanTuDong()" onkeyup="tinhToanTuDong()" value="" placeholder="dd/mm/yyyy" style="font-size:13px;">
+        </td>
+        <td class="text-center align-middle">
+            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteRow(this)" title="Xoá dòng này">✕</button>
+        </td>
+    </tr>`;
+    tbody.append(tr); tinhToanTuDong(); if(typeof unlockSubmitButton === 'function') unlockSubmitButton();
+}
+
+function updateRowData(input) {
+    const row = $(input).closest('tr'); row.attr('data-deadline', row.find('.deadline-input').val() || ""); row.attr('data-type', row.find('.progress-input').val() || ""); tinhToanTuDong();
+}
+
+function deleteRow(btn) {
+    const confirmMsg = "Thầy/Cô có chắc chắn muốn xoá nhiệm vụ này không?\n\nLưu ý: Sau khi xoá, cần bấm 'Lưu nhật ký' để đồng bộ dữ liệu lên máy chủ.";
+    if (typeof showPopup === 'function') {
+        showPopup('confirm', confirmMsg, function() { $(btn).closest('tr').remove(); updateSTT(); tinhToanTuDong(); if(typeof unlockSubmitButton === 'function') unlockSubmitButton(); });
+    } else {
+        if (confirm(confirmMsg)) { $(btn).closest('tr').remove(); updateSTT(); tinhToanTuDong(); if(typeof unlockSubmitButton === 'function') unlockSubmitButton(); }
+    }
+}
+
+function updateSTT() {
+    $('#taskTable tbody tr.task-row').each(function(index) { $(this).find('.stt-cell').text(index + 1); });
+    if ($('#taskTable tbody tr.task-row').length === 0) { $('#taskTable tbody').html('<tr><td colspan="7" class="text-center text-muted py-3 small">Chưa có nhiệm vụ.</td></tr>'); }
+}
+
+function tinhToanTuDong() {
+    const inpBonus = document.getElementById('inpBonus');
+    let diemDieuChinh = inpBonus ? (parseFloat(inpBonus.value) || 0) : 0;
+    
+    if(inpBonus) {
+        inpBonus.classList.remove('score-positive', 'score-negative', 'score-zero');
+        if (diemDieuChinh > 0) inpBonus.classList.add('score-positive');
+        else if (diemDieuChinh < 0) inpBonus.classList.add('score-negative');
+        else inpBonus.classList.add('score-zero');
+    }
+
+    let tongViec = 0, daDanhGia = 0;
+    let datCL = 0, dungHan = 0, vuotTienDo = 0;
+    let diemThuong_Total = 0;
+    const rows = document.querySelectorAll('#taskTable tbody tr.task-row');
+    tongViec = rows.length;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    rows.forEach((row, index) => { 
+        const dlGiao = row.getAttribute('data-deadline'), loaiTienDoRaw = row.getAttribute('data-type') || "", loaiTienDo = loaiTienDoRaw.toLowerCase(); 
+        const selectResult = row.querySelector('.result-select'), ketQua = selectResult ? selectResult.value : "";
+        const inputFinish = row.querySelector('.date-input'), ngayHT = inputFinish ? inputFinish.value : "";
+        row.classList.remove('bg-early', 'bg-today', 'bg-late'); 
+        
+        let dTarget = null;
+        if (index < 2) { dTarget = today; } else { let parsedDeadline = parseDateVN(dlGiao); if(parsedDeadline) { parsedDeadline.setHours(0,0,0,0); dTarget = parsedDeadline; } }
+
+        let dFinish = parseDateVN(ngayHT);
+        if (dFinish && dTarget) {
+            dFinish.setHours(0, 0, 0, 0); 
+            if (dFinish.getTime() < dTarget.getTime()) { row.classList.add('bg-early'); } 
+            else if (dFinish.getTime() === dTarget.getTime()) { row.classList.add('bg-today'); } 
+            else { row.classList.add('bg-late'); }
+        }
+
+        if (ketQua !== "") {
+            daDanhGia++; 
+            let isDatCL = (ketQua === "Chất lượng đạt yêu cầu"), daysDiff = calDateDiff(dlGiao, ngayHT); 
+            if (isDatCL) datCL++;
+            if (daysDiff !== null && daysDiff >= 0) dungHan++;
+            if (isDatCL && daysDiff !== null && daysDiff >= 2 && loaiTienDo.includes("cho vượt tiến độ")) { vuotTienDo++; }
+            if (index >= 2) { 
+                if(isDatCL) { if(daysDiff !== null && daysDiff >= 0) { diemThuong_Total += 1; if(daysDiff >= 2 && loaiTienDo.includes("cho vượt tiến độ")) { diemThuong_Total += 1; } } }
+            }
+        }
+    });
+
+    let xepLoai = "Chưa hoàn thành", diemCoSo = 0;
+    if (tongViec === 0) { xepLoai = "Chưa giao việc"; } 
+    else if (tongViec > 0 && daDanhGia === 0) { xepLoai = "Chưa đánh giá"; } 
+    else {
+        let pctDatCL = (datCL / tongViec) * 100, pctDungHan = (dungHan / tongViec) * 100, pctVuot = (vuotTienDo / tongViec) * 100;
+        if (pctDatCL >= 100 && pctDungHan >= 100 && pctVuot >= 30) { xepLoai = "Xuất sắc"; diemCoSo = 95; } 
+        else if (pctDatCL >= 100 && pctDungHan >= 100) { xepLoai = "Hoàn thành tốt"; diemCoSo = 85; } 
+        else if (pctDatCL >= 70 && pctDungHan >= 70) { xepLoai = "Hoàn thành"; diemCoSo = 75; } 
+        else { xepLoai = "Chưa hoàn thành"; diemCoSo = 0; }
+    }
+
+    let tongDiem = 0;
+    if (xepLoai !== "Chưa giao việc" && xepLoai !== "Chưa đánh giá") { tongDiem = Math.min(diemCoSo + diemThuong_Total, 100); }
+    let diemCuoi = tongDiem + diemDieuChinh;
+
+    const display = document.getElementById('txtResultDisplay');
+    if (display) {
+        display.innerText = `${xepLoai}: ${diemCuoi} điểm`;
+        display.className = "fw-bold force-one-line"; 
+        if (xepLoai === "Xuất sắc") display.classList.add("text-success");
+        else if (xepLoai.includes("Hoàn thành")) display.classList.add("text-primary");
+        else display.classList.add("text-danger");
+    }
+}
+
+function calDateDiff(deadlineStr, finishStr) {
+    if (!finishStr) return null; let dFinish = parseDateVN(finishStr); if (!dFinish) return null;
+    let dDeadline = parseDateVN(deadlineStr); if (!dDeadline) return 0; 
+    const diffTime = dDeadline - dFinish; return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+}
+
+function parseDateVN(str) {
+    if (!str || typeof str !== 'string') return null; const cleanStr = str.trim().replace(/[-.]/g, '/'); const parts = cleanStr.split('/');
+    if (parts.length !== 3) return null; let day = parseInt(parts[0], 10), month = parseInt(parts[1], 10), year = parseInt(parts[2], 10);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null; return new Date(year, month - 1, day);
+}
+
+function formatDateDisplay(dateStr) {
+    if (!dateStr) return ""; let str = String(dateStr).trim();
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) return str;
+    if (str.length >= 10 && str.charAt(4) === '-') { let parts = str.substring(0, 10).split('-'); if(parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0]; }
+    let cleanStr = str.replace(/\(.*?\)/g, '').trim(); let d = new Date(cleanStr);
+    if (!isNaN(d.getTime())) { let day = d.getDate(), month = d.getMonth() + 1, year = d.getFullYear(); return (day < 10 ? '0' + day : day) + '/' + (month < 10 ? '0' + month : month) + '/' + year; }
+    return dateStr;
+}
+
+function liveUpdateScore() { tinhToanTuDong(); }
+</script>
