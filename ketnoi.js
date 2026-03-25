@@ -2,6 +2,7 @@
    Tệp: ketnoi.js
    Mục đích: Cầu nối giao tiếp (API Client) gọi các hàm từ Server bằng Fetch
    Hệ thống: Quản lý Nhiệm vụ - TH Hợp Thành
+   Phiên bản: Đồng bộ hóa An toàn Định danh (Safe ID)
    ========================================================================== */
 
 // 1. ĐIỀN LINK WEB APP (API) CỦA THẦY VÀO ĐÂY:
@@ -38,9 +39,9 @@ const ServerAPI = {
        PHẦN 1: CÁC HÀM LIÊN KẾT VỚI "PGV_Code.gs" (CORE & USER REPORT)
        ========================================================================== */
 
-    // 1. Lấy dữ liệu cá nhân của người dùng (Đã bổ sung clientEmail)
-    getUserData: function(requestSheetName, clientEmail, onSuccess, onError) {
-        this._request("getUserData", { requestSheetName: requestSheetName, clientEmail: clientEmail }, onSuccess, onError);
+    // 1. Lấy dữ liệu cá nhân của người dùng (Đã chuyển đổi sang sysAuth)
+    getUserData: function(requestSheetName, sysAuth, onSuccess, onError) {
+        this._request("getUserData", { requestSheetName: requestSheetName, sysAuth: sysAuth }, onSuccess, onError);
     },
 
     // 2. Lưu tạm dữ liệu báo cáo
@@ -78,14 +79,14 @@ const ServerAPI = {
         this._request("getListSheets", {}, onSuccess, onError);
     },
 
-    // 9. Kiểm tra quyền Giáo viên (Đã bổ sung clientEmail)
-    checkTeacherPermission: function(clientEmail, onSuccess, onError) {
-        this._request("checkTeacherPermission", { clientEmail: clientEmail }, onSuccess, onError);
+    // 9. Kiểm tra quyền Giáo viên (Đã chuyển đổi sang sysAuth)
+    checkTeacherPermission: function(sysAuth, onSuccess, onError) {
+        this._request("checkTeacherPermission", { sysAuth: sysAuth }, onSuccess, onError);
     },
 
-    // 10. Kiểm tra quyền truy cập Tab Giao Việc (Đã bổ sung clientEmail)
-    checkGiaoViecTabPermission: function(clientEmail, onSuccess, onError) {
-        this._request("checkGiaoViecTabPermission", { clientEmail: clientEmail }, onSuccess, onError);
+    // 10. Kiểm tra quyền truy cập Tab Giao Việc (Đã chuyển đổi sang sysAuth)
+    checkGiaoViecTabPermission: function(sysAuth, onSuccess, onError) {
+        this._request("checkGiaoViecTabPermission", { sysAuth: sysAuth }, onSuccess, onError);
     },
 
     /* ==========================================================================
