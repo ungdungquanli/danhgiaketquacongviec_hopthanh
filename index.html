@@ -361,7 +361,7 @@
       if (today > trialExpiryDate) {
         trialTitle.innerText = "Hết hạn dùng thử";
         trialTitle.style.color = "#dc3545"; 
-        trialMessage.innerHTML = "Thời gian dùng thử 14 ngày của bạn đã kết thúc.<br>Vui lòng liên hệ Admin (Hoàng Ngọc Lâm) để gia hạn phần mềm.";
+        trialMessage.innerHTML = "Thời gian dùng thử 14 ngày của bạn đã kết thúc.<br>Vui lòng liên hệ (Hoàng Ngọc Lâm) để gia hạn phần mềm.";
         
         btnTrialOk.innerText = 'Thoát hệ thống';
         btnTrialOk.classList.remove('btn-primary');
@@ -502,7 +502,7 @@
         $('#main-app .tab-content').addClass('locked-content');
         $('#main-app').find('input, select, textarea, button').not('button[onclick="thoatTaiKhoan()"]').prop('disabled', true);
         
-        showPopup('error', "⛔ BẠN KHÔNG CÓ QUYỀN TRUY CẬP HỆ THỐNG\n\nHãy liên hệ Admin.");
+        showPopup('error', "⛔ BẠN KHÔNG CÓ QUYỀN TRUY CẬP HỆ THỐNG\n\nHãy liên hệ quản lý.");
         return;
       }
 
