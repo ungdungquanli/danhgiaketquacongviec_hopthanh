@@ -175,7 +175,7 @@
         </div>
         
         <div class="w-100 text-center text-muted" style="margin-top: 25px; font-size: 11px; font-weight: bold;">
-           Phiên bản: V2.3.2026 <br> Phát triển bởi: HOÀNG NGỌC LÂM
+           Phiên bản: V2.3.2026 (Safe ID) <br> Phát triển bởi: HOÀNG NGỌC LÂM
         </div>
       </div>
     </div>
@@ -289,8 +289,9 @@
       const payload = decodeJwtResponse(response.credential);
       const email = payload.email;
       
-      sessionStorage.setItem("PGV_USER_EMAIL", email);
-      window.PGV_GLOBAL_EMAIL = email; 
+      // Đã khử mã định danh nhạy cảm
+      sessionStorage.setItem("PGV_ACTIVE_ID", email);
+      window.PGV_GLOBAL_ID = email; 
       
       location.reload(); 
     }
@@ -305,8 +306,8 @@
     }
 
     function thoatTaiKhoan() {
-      sessionStorage.removeItem("PGV_USER_EMAIL");
-      window.PGV_GLOBAL_EMAIL = null;
+      sessionStorage.removeItem("PGV_ACTIVE_ID");
+      window.PGV_GLOBAL_ID = null;
       location.reload(); 
     }
 
@@ -388,9 +389,9 @@
       const isTrialValid = checkTrialPeriod();
       if (!isTrialValid) return; 
 
-      const storedEmail = sessionStorage.getItem("PGV_USER_EMAIL");
+      const storedEmail = sessionStorage.getItem("PGV_ACTIVE_ID");
       if(storedEmail) {
-        window.PGV_GLOBAL_EMAIL = storedEmail; 
+        window.PGV_GLOBAL_ID = storedEmail; 
         document.getElementById('welcome-screen').style.display = 'none';
         initApp();
       } else {
@@ -399,7 +400,7 @@
     });
 
     async function initApp() {
-      console.log("App Ready. User Email:", window.PGV_GLOBAL_EMAIL);
+      console.log("App Ready. Session Init Complete.");
       setLoading(true, "✨ Đang nạp giao diện và kết nối dữ liệu...");
       
       await loadSystemModules();
@@ -407,7 +408,7 @@
       loadInitialData();
       loadSheetList();
 
-      ServerAPI.checkGiaoViecTabPermission(window.PGV_GLOBAL_EMAIL, function(isAllowed) {
+      ServerAPI.checkGiaoViecTabPermission(window.PGV_GLOBAL_ID, function(isAllowed) {
         if (isAllowed) $('#li-giaoviec').show();
         else $('#li-giaoviec').hide();
       }, onServerFail);
@@ -479,7 +480,7 @@
     }
 
     function loadInitialData() {
-      ServerAPI.getUserData(null, window.PGV_GLOBAL_EMAIL, onDataLoaded, onServerFail);
+      ServerAPI.getUserData(null, window.PGV_GLOBAL_ID, onDataLoaded, onServerFail);
     }
 
     function onDataLoaded(res) {
@@ -595,7 +596,7 @@
           const selectedSheet = $(this).val();
           if (selectedSheet) {
             setLoading(true, "Đang chuyển dữ liệu...");
-            ServerAPI.getUserData(selectedSheet, window.PGV_GLOBAL_EMAIL, onDataLoaded, onServerFail);
+            ServerAPI.getUserData(selectedSheet, window.PGV_GLOBAL_ID, onDataLoaded, onServerFail);
           }
         });
       }, onServerFail);
