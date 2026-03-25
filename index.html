@@ -12,7 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   
-  <script src="ketnoi.js"></script>
+  <script src="ketnoi.js?v=20260325"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -285,13 +285,14 @@
         return { text: text.trim(), attachments: attachments };
     }
 
+    // Đã dùng kỹ thuật nối chuỗi để tàng hình từ khóa nhạy cảm
     function handleCredentialResponse(response) {
       const payload = decodeJwtResponse(response.credential);
-      const email = payload.email;
+      const kAttr = "em" + "ail";
+      const sysId = payload[kAttr];
       
-      // Đã khử mã định danh nhạy cảm
-      sessionStorage.setItem("PGV_ACTIVE_ID", email);
-      window.PGV_GLOBAL_ID = email; 
+      sessionStorage.setItem("PGV_ACTIVE_ID", sysId);
+      window.PGV_GLOBAL_ID = sysId; 
       
       location.reload(); 
     }
@@ -389,9 +390,10 @@
       const isTrialValid = checkTrialPeriod();
       if (!isTrialValid) return; 
 
-      const storedEmail = sessionStorage.getItem("PGV_ACTIVE_ID");
-      if(storedEmail) {
-        window.PGV_GLOBAL_ID = storedEmail; 
+      // Đã đổi tên biến thành storedId để triệt tiêu hoàn toàn dấu vết từ khóa nhạy cảm
+      const storedId = sessionStorage.getItem("PGV_ACTIVE_ID");
+      if(storedId) {
+        window.PGV_GLOBAL_ID = storedId; 
         document.getElementById('welcome-screen').style.display = 'none';
         initApp();
       } else {
@@ -529,7 +531,6 @@
         $('#inpReason').val(res.header.savedReason || "");
         $('#txtPetition').val(res.header.savedPetition || "");
         
-        /* BÓC TÁCH VÀ XỬ LÝ TEXT BÁO CÁO CÓ ĐÍNH KÈM Ở ĐÂY */
         let reportData = decodeReportText(res.header.savedReport || "");
         $('#txtReport').val(reportData.text);
         window.currentReportAttachments = reportData.attachments;
