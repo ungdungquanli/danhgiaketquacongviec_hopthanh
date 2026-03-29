@@ -55,6 +55,21 @@
   let dsCanbgv = []; let ddemDong = 1; let tdtaiXoaCho = null; let ptuChoXoa = null;
   setTimeout(function() { gvTaiCanb(); }, 500);
 
+  // Khối mã hỗ trợ: Chuyển đổi định dạng ngày tháng từ chuẩn ISO về dd/mm/yyyy
+  function gvDinhDangNgay(giaTri) {
+    if (!giaTri) return "";
+    if (typeof giaTri === 'string' && giaTri.includes('T') && giaTri.includes('Z')) {
+      const d = new Date(giaTri);
+      if (!isNaN(d.getTime())) {
+        const ngay = d.getDate().toString().padStart(2, '0');
+        const thang = (d.getMonth() + 1).toString().padStart(2, '0');
+        const nam = d.getFullYear();
+        return ngay + '/' + thang + '/' + nam;
+      }
+    }
+    return giaTri; // Giữ nguyên dữ liệu nếu không phải dạng chuỗi thời gian ISO
+  }
+
   function gvTbaoNhanh(loai, tb) {
       const mh = document.getElementById('gvHopThoaiTb'), hd = document.getElementById('gvDauHtTb'), td = document.getElementById('gvTdeHtTb'), ct = document.getElementById('gvNdHtTb'), bg = document.getElementById('gvBtuongHtTb');
       hd.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'text-dark', 'text-white'); ct.innerText = tb;
@@ -72,7 +87,7 @@
 
   function gvTaiCanb() { gvDatTai(true, "Đang tải danh sách nhân sự (để giao việc)..."); khachApi.gvLaydsCanb(function(dl) { dsCanbgv = dl; gvLaydlGoc(); }, function(l) { gvTbaoNhanh('loi', "Lỗi tải nhân sự: " + l.message); gvDatTai(false); }); }
 
-  function gvLaydlGoc() { gvDatTai(true, "✨ Đang cập nhật nhiệm vụ mới ✨"); khachApi.gvLaydlBdau(gvKhiTaiXong, function(l) { gvTbaoNhanh('loi', "Lỗi tải dữ liệu: " + l.message); gvDatTai(false); }); }
+  function gvLaydlGoc() { gvDatTai(true, "✨ Đang tải nhiệm vụ mới ✨"); khachApi.gvLaydlBdau(gvKhiTaiXong, function(l) { gvTbaoNhanh('loi', "Lỗi tải dữ liệu: " + l.message); gvDatTai(false); }); }
 
   function gvKhiTaiXong(dl) {
     gvDatTai(false); if(dl.nam) document.getElementById('gvLocNam').value = dl.nam; if(dl.thang) document.getElementById('gvLocThang').value = dl.thang;
@@ -89,7 +104,15 @@
     if (!dcb) { lchon += `<option value="DELETE" style="font-weight:bold; color:red;">-CHUYỂN THÁNG MỚI-</option>`; }
     dsCanbgv.forEach(s => { let chon = (ngnth === s.ttrg) ? "selected" : ""; lchon += `<option value="${s.ttrg}" data-name="${s.tenn}" ${chon}>${s.tenn}</option>`; });
     let bstt = ddemDong, bnd = "", bhc = "", bltd = "", bgc = "";
-    if (dong) { bstt = dong[0]; bnd = dong[1] || ""; bhc = dong[2] || ""; bltd = dong[3] || ""; bgc = dong[5] || ""; ddemDong = parseInt(bstt) + 1; } else { ddemDong++; }
+    if (dong) { 
+        bstt = dong[0]; 
+        bnd = dong[1] || ""; 
+        // Thay đổi tại đây: Gọi hàm xử lý định dạng trước khi gán dữ liệu
+        bhc = gvDinhDangNgay(dong[2]); 
+        bltd = dong[3] || ""; 
+        bgc = dong[5] || ""; 
+        ddemDong = parseInt(bstt) + 1; 
+    } else { ddemDong++; }
     const cv = (bltd === "Cho vượt tiến độ") ? "selected" : "";
     tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)">${bnd}</textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)">${bhc}</textarea></td><td><select class="form-select oTdoGv"><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)">${bgc}</textarea></td>`; tb.appendChild(tr);
   }
