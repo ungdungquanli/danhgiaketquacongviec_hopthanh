@@ -4,18 +4,18 @@
   #khuGvChinh .tDe { font-weight: bold; font-size: 20px; color: #dc3545; text-transform: uppercase; margin: 0; }
   #khuGvChinh .hopLoc { display: flex; gap: 10px; align-items: center; }
   #khuGvChinh .nhapTuyChinh { font-size: 16px; font-weight: bold; color: #0d6efd; border: 1px solid #ced4da; padding: 4px 10px; border-radius: 4px; height: 34px; }
-  #khuGvChinh .hopBang { background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 5px; }
-  #khuGvChinh table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  #khuGvChinh th { background-color: #0d6efd; color: white; text-align: center; padding: 8px 4px; border: 1px solid #dee2e6; vertical-align: middle; font-size: 13px; }
+  #khuGvChinh .hopBang { background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 5px; max-height: 70vh; overflow-y: auto; border: 1px solid #f0f0f0; }
+  #khuGvChinh table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 0; }
   
-  /* Bổ sung thủ thuật height: 1px để ô tính nhận diện và truyền chiều cao tối đa cho phần tử con */
-  #khuGvChinh td { border: 1px solid #999; padding: 0 !important; vertical-align: middle !important; height: 1px; }
+  /* Cố định tiêu đề bảng (Sticky Header) và căn giữa */
+  #khuGvChinh th { position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important; text-align: center; padding: 8px 4px; border: 1px solid #dee2e6; vertical-align: middle; font-size: 13px; }
   
-  /* Lớp bọc Flexbox đảm bảo mọi nội dung bên trong được kéo vào chính giữa tâm ô tính */
-  .oKhungGiua { display: flex; flex-direction: column; justify-content: center; height: 100%; width: 100%; }
+  /* Căn giữa trực tiếp trên thẻ td, không dùng div bọc thêm */
+  #khuGvChinh td { border: 1px solid #999; padding: 1px 2px !important; vertical-align: middle !important; }
 
-  #gvBangNv textarea.form-control { font-family: 'Times New Roman', Times, serif; font-size: 14px; border: none !important; border-radius: 0; box-shadow: none !important; width: 100%; padding: 6px 4px; margin: 0; background-color: transparent; resize: none; overflow: hidden; min-height: 36px; line-height: 1.4; white-space: pre-wrap; box-sizing: border-box; }
-  #gvBangNv input.form-control, #gvBangNv select.form-select { font-family: 'Times New Roman', Times, serif; font-size: 14px; border: none !important; box-shadow: none !important; width: 100%; padding: 6px 4px; background-color: transparent; }
+  /* Biến các ô nhập liệu thành dạng trong suốt, loại bỏ viền để hiển thị liền mạch với ô td */
+  #gvBangNv textarea.form-control { font-family: 'Times New Roman', Times, serif; font-size: 14px; border: none !important; background-color: transparent; resize: none; overflow: hidden; min-height: 35px; line-height: 1.3; white-space: pre-wrap; padding: 4px; box-shadow: none !important; border-radius: 0; margin: 0; }
+  #gvBangNv input.form-control, #gvBangNv select.form-select { font-family: 'Times New Roman', Times, serif; font-size: 14px; border: none !important; box-shadow: none !important; background-color: transparent; width: 100%; height: 100%; padding: 4px; }
   
   #khuGvChinh td.oHdong { text-align: center; padding: 2px !important; background-color: #f8f9fa; }
   #khuGvChinh .nutThem { margin-top: 5px; font-size: 13px; font-weight: bold; }
@@ -46,8 +46,8 @@
         <thead><tr><th style="width: 40px;">Xóa</th><th style="width: 40px;">STT</th><th style="width: 35%;">Nội dung công việc</th><th style="width: 120px;">Thời gian HT</th><th style="width: 130px;">Loại tiến độ</th><th style="width: 200px;">Người thực hiện</th><th style="width: 15%;">Ghi chú</th></tr></thead>
         <tbody id="gvThanBang"></tbody>
       </table>
-      <button class="btn btn-success nutThem" onclick="gvThemDong()">+ Thêm dòng mới</button>
     </div>
+    <div style="background: white; padding: 0 5px;"><button class="btn btn-success nutThem" onclick="gvThemDong()">+ Thêm dòng mới</button></div>
 
     <div class="modal fade" id="gvHopThoaiXoa" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
       <div class="modal-dialog modal-dialog-centered"><div class="modal-content border-danger"><div class="modal-header bg-danger text-white"><h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> CẢNH BÁO</h5><button type="button" class="btn-close" data-bs-dismiss="modal" onclick="gvHuyXoa()"></button></div><div class="modal-body text-center p-4"><p class="fs-6 mb-3">Bạn đang chọn <strong>XÓA TOÀN BỘ DỮ LIỆU CŨ</strong>.</p><p class="text-danger fw-bold">Hành động này sẽ xóa sạch dữ liệu hiện tại.</p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" onclick="gvHuyXoa()">Hủy bỏ</button><button type="button" class="btn btn-danger px-4 fw-bold" onclick="gvXndongXoa()">Đồng ý Xóa</button></div></div></div>
@@ -120,15 +120,15 @@
     } else { ddemDong++; }
     const cv = (bltd === "Cho vượt tiến độ") ? "selected" : "";
     
-    // Đã bổ sung lớp bọc khung (div.oKhungGiua) vào trong từng ô tính để ép toàn bộ dữ liệu vào tâm
+    // Đã loại bỏ hoàn toàn các thẻ div bọc trong td, giữ nguyên bản mã HTML chuẩn
     tr.innerHTML = `
-      <td class="oHdong"><div class="oKhungGiua">${btnxoa}</div></td>
-      <td class="text-center"><div class="oKhungGiua"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></div></td>
-      <td><div class="oKhungGiua"><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)">${bnd}</textarea></div></td>
-      <td><div class="oKhungGiua"><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)">${bhc}</textarea></div></td>
-      <td><div class="oKhungGiua"><select class="form-select oTdoGv"><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></div></td>
-      <td><div class="oKhungGiua"><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></div></td>
-      <td><div class="oKhungGiua"><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)">${bgc}</textarea></div></td>`; 
+      <td class="oHdong align-middle">${btnxoa}</td>
+      <td class="text-center align-middle"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td>
+      <td class="align-middle"><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)">${bnd}</textarea></td>
+      <td class="align-middle"><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)">${bhc}</textarea></td>
+      <td class="align-middle"><select class="form-select text-center oTdoGv"><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td>
+      <td class="align-middle"><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td>
+      <td class="align-middle"><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)">${bgc}</textarea></td>`; 
     tb.appendChild(tr);
   }
   
