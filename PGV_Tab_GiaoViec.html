@@ -167,7 +167,6 @@
             gvVeDong(); 
         }
 
-        // Bổ sung: Hiển thị nút "Cập nhật nhiệm vụ chung" nếu có quyền Admin
         if (typeof canbHientai !== 'undefined' && canbHientai.qchon === true) {
             const btnChung = document.getElementById('btnCapNhatChung');
             if (btnChung) btnChung.style.display = 'inline-block';
@@ -212,7 +211,8 @@
         
         const cv = (bltd === "Cho vượt tiến độ") ? "selected" : "";
         
-        tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)"></textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)"></textarea></td><td><select class="form-select oTdoGv" ${dcb}><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)"></textarea></td>`; 
+        // Cập nhật: Thêm sự kiện onkeyup="gvDinhDangNgay(this, event)" cho ô nhập Thời gian HT (oNgayGv)
+        tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)"></textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)" onkeyup="gvDinhDangNgay(this, event)"></textarea></td><td><select class="form-select oTdoGv" ${dcb}><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)"></textarea></td>`; 
         
         tr.querySelector('.oNdGv').value = bnd;
         tr.querySelector('.oNgayGv').value = bhc;
@@ -224,6 +224,15 @@
     function gvCoDan(ptu) { 
         ptu.style.height = 'auto'; 
         ptu.style.height = (ptu.scrollHeight) + 'px'; 
+    }
+
+    // Bổ sung: Hàm tự động định dạng ngày tháng khi gõ phím
+    function gvDinhDangNgay(ptu, e) {
+        if (e && (e.which === 8 || e.which === 46)) return; // Bỏ qua nếu người dùng bấm Backspace hoặc Delete
+        let v = ptu.value.replace(/\D/g, ''); // Xóa toàn bộ ký tự không phải là số
+        if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2);
+        if (v.length > 5) v = v.substring(0, 5) + '/' + v.substring(5, 9);
+        ptu.value = v;
     }
     
     function gvThemDong() { 
@@ -303,13 +312,11 @@
         gvGoiMayChu(nm, th_htai, nvx, ptu, gth);
     }
 
-    // Bổ sung: Hàm cập nhật tự động dòng 1 và 2 (Nhiệm vụ chung)
     function gvCapNhatNhiemVuChung() {
         const nm = document.getElementById('gvLocNam').value;
         const th_htai = document.getElementById('gvLocThang').value;
         let dsNviec = [];
         
-        // Quét tìm STT 1 và 2 trên bảng
         const sds = document.querySelectorAll('#gvThanBang tr');
         sds.forEach(dong => {
             const sttVal = dong.querySelector('.oSttGv').value;
@@ -337,7 +344,6 @@
 
         gvDatTai(true, "⏳ Đang cập nhật nhiệm vụ chung...");
         
-        // Gửi lệnh tuần tự để đảm bảo an toàn cho máy chủ
         function ghiTungDong(index) {
             if (index >= dsNviec.length) {
                 gvDatTai(false);
