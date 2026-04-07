@@ -185,19 +185,17 @@
         }
         
         dsCanbgv.forEach(s => { 
-            // Cập nhật cốt lõi: Đối chiếu chéo với cả Mã Trang tính (s.ttrg) và Tên Hiển thị (s.tenn)
             let chon = (ngnth === s.ttrg || ngnth === s.tenn) ? "selected" : ""; 
             lchon += `<option value="${s.ttrg}" data-name="${s.tenn}" ${chon}>${s.tenn}</option>`; 
         });
         
-        // Đảm bảo truy xuất chuẩn xác 6 trường, tránh lỗi undefined
         let bstt = ddemDong, bnd = "", bhc = "", bltd = "", bgc = "";
         if (dong) { 
             bstt = dong[0]; 
             bnd = dong[1] || ""; 
             bhc = dong[2] || ""; 
             bltd = dong[3] || ""; 
-            bgc = dong[5] || ""; // Cột Ghi chú là Index 5
+            bgc = dong[5] || ""; 
             ddemDong = parseInt(bstt) + 1; 
         } else { 
             ddemDong++; 
@@ -205,10 +203,9 @@
         
         const cv = (bltd === "Cho vượt tiến độ") ? "selected" : "";
         
-        // Khởi tạo thẻ HTML trơn tru
-        tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)"></textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)"></textarea></td><td><select class="form-select oTdoGv"><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)"></textarea></td>`; 
+        // Thêm dcb vào cả oTdoGv (Tiến độ) và oNnghanGv (Người thực hiện) để khóa nếu đã được load
+        tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)"></textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)"></textarea></td><td><select class="form-select oTdoGv" ${dcb}><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)"></textarea></td>`; 
         
-        // Nạp nội dung Textarea an toàn tuyệt đối tránh gãy cú pháp HTML
         tr.querySelector('.oNdGv').value = bnd;
         tr.querySelector('.oNgayGv').value = bhc;
         tr.querySelector('.oGchuGv').value = bgc;
