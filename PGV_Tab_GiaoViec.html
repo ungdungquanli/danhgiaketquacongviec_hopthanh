@@ -52,9 +52,6 @@
 </div>
 
 <script>
-    // -----------------------------------------------------
-    // KHAI BÁO BIẾN TOÀN CỤC
-    // -----------------------------------------------------
     let dsCanbgv = []; 
     let ddemDong = 1; 
     let tdtaiXoaCho = null; 
@@ -64,9 +61,6 @@
         gvTaiCanb(); 
     }, 500);
 
-    // -----------------------------------------------------
-    // HÀM GIAO DIỆN & THÔNG BÁO
-    // -----------------------------------------------------
     function gvTbaoNhanh(loai, tb) {
         const mh = document.getElementById('gvHopThoaiTb');
         const hd = document.getElementById('gvDauHtTb');
@@ -120,9 +114,6 @@
         }
     }
 
-    // -----------------------------------------------------
-    // HÀM TẢI DỮ LIỆU BAN ĐẦU
-    // -----------------------------------------------------
     function gvTaiCanb() { 
         gvDatTai(true, "Đang tải danh sách nhân sự (để giao việc)..."); 
         khachApi.gvLaydsCanb(
@@ -174,9 +165,6 @@
         }
     }
 
-    // -----------------------------------------------------
-    // HÀM XỬ LÝ BẢNG & DÒNG DỮ LIỆU
-    // -----------------------------------------------------
     function gvVeDong(dong = null) {
         const tb = document.getElementById('gvThanBang');
         const tr = document.createElement('tr');
@@ -188,8 +176,8 @@
         let btnxoa = dong ? `<i class="bi bi-lock-fill text-secondary" title="Đã lưu, không thể xoá"></i>` : `<button class="btn btn-danger btn-sm p-0" style="width:24px; height:24px; line-height:20px;" onclick="gvXoaDong(this)">X</button>`;
         
         let lchon = `<option value="">--Chọn--</option>`;
-        if (!dcb || ngnthH === 'ALL') { 
-            let tchon = (ngnthH === 'ALL') ? "selected" : ""; 
+        if (!dcb || ngnthH === 'ALL' || ngnthH === '-TOÀN TRƯỜNG-') { 
+            let tchon = (ngnthH === 'ALL' || ngnthH === '-TOÀN TRƯỜNG-') ? "selected" : ""; 
             lchon += `<option value="ALL" style="font-weight:bold; color:blue;" ${tchon}>-TOÀN TRƯỜNG-</option>`; 
         }
         if (!dcb) { 
@@ -197,17 +185,19 @@
         }
         
         dsCanbgv.forEach(s => { 
-            let chon = (ngnth === s.ttrg) ? "selected" : ""; 
+            // Cập nhật cốt lõi: Đối chiếu chéo với cả Mã Trang tính (s.ttrg) và Tên Hiển thị (s.tenn)
+            let chon = (ngnth === s.ttrg || ngnth === s.tenn) ? "selected" : ""; 
             lchon += `<option value="${s.ttrg}" data-name="${s.tenn}" ${chon}>${s.tenn}</option>`; 
         });
         
+        // Đảm bảo truy xuất chuẩn xác 6 trường, tránh lỗi undefined
         let bstt = ddemDong, bnd = "", bhc = "", bltd = "", bgc = "";
         if (dong) { 
             bstt = dong[0]; 
             bnd = dong[1] || ""; 
             bhc = dong[2] || ""; 
             bltd = dong[3] || ""; 
-            bgc = dong[5] || ""; 
+            bgc = dong[5] || ""; // Cột Ghi chú là Index 5
             ddemDong = parseInt(bstt) + 1; 
         } else { 
             ddemDong++; 
@@ -215,7 +205,14 @@
         
         const cv = (bltd === "Cho vượt tiến độ") ? "selected" : "";
         
-        tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)">${bnd}</textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)">${bhc}</textarea></td><td><select class="form-select oTdoGv"><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)">${bgc}</textarea></td>`; 
+        // Khởi tạo thẻ HTML trơn tru
+        tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)"></textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)"></textarea></td><td><select class="form-select oTdoGv"><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)"></textarea></td>`; 
+        
+        // Nạp nội dung Textarea an toàn tuyệt đối tránh gãy cú pháp HTML
+        tr.querySelector('.oNdGv').value = bnd;
+        tr.querySelector('.oNgayGv').value = bhc;
+        tr.querySelector('.oGchuGv').value = bgc;
+
         tb.appendChild(tr);
     }
     
@@ -243,9 +240,6 @@
         ddemDong = tb; 
     }
 
-    // -----------------------------------------------------
-    // HÀM XỬ LÝ CHUYỂN ĐỔI NGƯỜI NHẬN / CHUYỂN THÁNG
-    // -----------------------------------------------------
     function gvDoiNgn(ptu) {
         const dong = ptu.closest('tr'); 
         const ndg = dong.querySelector('.oNdGv').value.trim();
@@ -283,16 +277,12 @@
             const oThang = document.getElementById('gvLocThang');
             const vtThang = oThang.selectedIndex;
             
-            // Lưu lại tháng cũ để phòng trường hợp người dùng ấn Hủy Bỏ
             const thangCu = oThang.value;
-            
             if (vtThang < oThang.options.length - 1) {
                 oThang.selectedIndex = vtThang + 1;
             } else {
                 oThang.selectedIndex = 0; 
             }
-
-            // Gửi biến tháng MỚI (sau khi tịnh tiến) xuống máy chủ để cập nhật cho toàn bộ các trang tính
             const thangMoi = oThang.value;
 
             tdtaiXoaCho = { nam: nm, thang: thangMoi, nviec: nvx, thangCu: thangCu }; 
@@ -324,19 +314,13 @@
         if (ptuChoXoa) { 
             ptuChoXoa.value = ""; 
         } 
-        
-        // Hoàn trả lại tháng năm cũ nếu người dùng Hủy thao tác chuyển tháng
         if (tdtaiXoaCho && tdtaiXoaCho.thangCu) {
             document.getElementById('gvLocThang').value = tdtaiXoaCho.thangCu;
         }
-        
         tdtaiXoaCho = null; 
         ptuChoXoa = null; 
     }
 
-    // -----------------------------------------------------
-    // HÀM GIAO TIẾP VỚI GOOGLE APPS SCRIPT
-    // -----------------------------------------------------
     function gvGoiMayChu(n, t, nv, ptu, hth) {
         khachApi.gvXulyNviec(
             { nam: n, thang: t, nviec: nv }, 
