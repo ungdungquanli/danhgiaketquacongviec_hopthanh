@@ -10,7 +10,7 @@ const khachApi = {
 
         // 1. Ánh xạ tên lệnh (Action)
         const mapAction = {
-            "laydlcanb": "getUserData",
+            "laydlcanb": "getStaffData", // Cập nhật: getUserData -> getStaffData
             "luutam": "saveTempData",
             "nopbcao": "submitReport",
             "laydlthop": "getSummaryData",
@@ -32,7 +32,7 @@ const khachApi = {
         // 2. Chuyển đổi dữ liệu gửi đi (Payload)
         if (hdong === "laydlcanb") {
             payloadGiaoTiep.requestSheetName = tdtai.ttrang;
-            payloadGiaoTiep.clientEmail = tdtai.tkcanb;
+            payloadGiaoTiep.staffEmail = tdtai.tkcanb; // Cập nhật: clientEmail -> staffEmail
         } else if (hdong === "luutam" && tdtai.dldeu) {
             payloadGiaoTiep.formData = {
                 sheetName: tdtai.dldeu.ttrg, daysOff: tdtai.dldeu.snnghi, bonusPoint: tdtai.dldeu.dthuong,
@@ -44,10 +44,10 @@ const khachApi = {
                 sheetName: tdtai.dldeu.ttrg, name: tdtai.dldeu.tenn, daysOff: tdtai.dldeu.snnghi,
                 schoolYear: tdtai.dldeu.nhoc, time: tdtai.dldeu.tgian, resultString: tdtai.dldeu.kq,
                 bonusPoint: tdtai.dldeu.dthuong, petition: tdtai.dldeu.kienn, report: tdtai.dldeu.bcao,
-                reason: tdtai.dldeu.ldo, clientEmail: tdtai.dldeu.taik
+                reason: tdtai.dldeu.ldo, staffEmail: tdtai.dldeu.taik // Cập nhật: clientEmail -> staffEmail
             };
         } else if (hdong === "ktraquyengv" || hdong === "ktraquyengvtab") {
-            payloadGiaoTiep.clientEmail = tdtai.tkcanb;
+            payloadGiaoTiep.staffEmail = tdtai.tkcanb; // Cập nhật: clientEmail -> staffEmail
         } else if (hdong === "gvxulynviec" && tdtai.tdtai) {
             let d = tdtai.tdtai;
             payloadGiaoTiep.payload = {
@@ -86,11 +86,11 @@ const khachApi = {
             }
 
             // 3. Chuyển đổi dữ liệu nhận về
-            if (actionName === "getUserData") {
+            if (actionName === "getStaffData") { // Cập nhật: getUserData -> getStaffData
                 kq.koxd = kqRaw.isUnknown;
-                kq.qchon = kqRaw.canSelectUser;
+                kq.qchon = kqRaw.canSelectStaff; // Cập nhật: canSelectUser -> canSelectStaff
                 kq.qsuad = kqRaw.canEditBonus;
-                if (kqRaw.user) kq.canb = { ttrg: kqRaw.user.sheetName, taik: kqRaw.user.email, tenn: kqRaw.user.name };
+                if (kqRaw.staff) kq.canb = { ttrg: kqRaw.staff.sheetName, taik: kqRaw.staff.email, tenn: kqRaw.staff.name }; // Cập nhật: user -> staff
                 if (kqRaw.header) {
                     kq.tde = {
                         tenn: kqRaw.header.name, snnghi: kqRaw.header.daysOff, nhoc: kqRaw.header.schoolYear,
@@ -123,7 +123,7 @@ const khachApi = {
         })
         .catch(loie => { if (khiLoi) khiLoi(loie); });
     },
-    // Các hàm gọi API phía dưới được giữ nguyên cấu trúc để bảo toàn mã cũ
+    // Các hàm gọi API phía dưới được giữ nguyên cấu trúc để bảo toàn mã HTML cũ
     layDlCanb: function(ttrang, taik, khiTcong, khiLoi) { this.yeucauApi("laydlcanb", { ttrang: ttrang, tkcanb: taik }, khiTcong, khiLoi); },
     luuTam: function(dldeu, khiTcong, khiLoi) { this.yeucauApi("luutam", { dldeu: dldeu }, khiTcong, khiLoi); },
     nopBcao: function(dl, khiTcong, khiLoi) { this.yeucauApi("nopbcao", { dldeu: dl }, khiTcong, khiLoi); },
