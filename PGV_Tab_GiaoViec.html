@@ -240,25 +240,8 @@
     
     const gth = gt.toUpperCase();
     
-    // Khối lệnh: Tự động tịnh tiến tháng (và năm) khi chọn Chuyển tháng mới
-    let thCu = document.getElementById('gvLocThang').value;
-    let nmCu = document.getElementById('gvLocNam').value;
-    
-    if (gth === 'DELETE') {
-      const oThang = document.getElementById('gvLocThang');
-      const vtThang = oThang.selectedIndex;
-      
-      if (vtThang < oThang.options.length - 1) {
-        oThang.selectedIndex = vtThang + 1;
-      } else {
-        oThang.selectedIndex = 0; // Trở lại tháng 1
-        const oNam = document.getElementById('gvLocNam');
-        if (oNam.selectedIndex < oNam.options.length - 1) {
-          oNam.selectedIndex += 1; // Nhảy sang năm học tiếp theo
-        }
-      }
-    }
-
+    // [GIỮ NGUYÊN BẢN]: Lưu lại biến tháng/năm lúc người dùng vừa chọn thao tác
+    // Để máy chủ xử lý đúng tháng hiện tại cần xóa, tránh việc xóa nhầm tiêu đề
     const nm = document.getElementById('gvLocNam').value;
     const th = document.getElementById('gvLocThang').value;
     
@@ -279,8 +262,23 @@
     };
     
     if (gth === 'DELETE') { 
-      // Cập nhật: Lưu thêm thông tin biến tạm thời của tháng cũ để phục hồi khi hủy
-      tdtaiXoaCho = { nam: nm, thang: th, nviec: nvx, namCu: nmCu, thangCu: thCu }; 
+      // [TÍNH NĂNG MỚI]: Tự động tịnh tiến tháng (và năm) trên giao diện ngay khi có lệnh
+      const oThang = document.getElementById('gvLocThang');
+      const vtThang = oThang.selectedIndex;
+      
+      if (vtThang < oThang.options.length - 1) {
+        oThang.selectedIndex = vtThang + 1;
+      } else {
+        oThang.selectedIndex = 0; // Trở lại tháng 1
+        const oNam = document.getElementById('gvLocNam');
+        if (oNam.selectedIndex < oNam.options.length - 1) {
+          oNam.selectedIndex += 1; // Nhảy sang năm học tiếp theo
+        }
+      }
+
+      // Vẫn giữ lại cấu trúc truyền nm, th của bản CŨ xuống server để xóa đúng dữ liệu
+      // Đồng thời lưu thêm namCu, thangCu để hàm gvHuyXoa phục hồi giao diện nếu cần
+      tdtaiXoaCho = { nam: nm, thang: th, nviec: nvx, namCu: nm, thangCu: th }; 
       ptuChoXoa = ptu; 
       const hmc = new bootstrap.Modal(document.getElementById('gvHopThoaiXoa')); 
       hmc.show(); 
@@ -298,6 +296,7 @@
     modal.hide(); 
     
     if (tdtaiXoaCho && ptuChoXoa) { 
+      // Máy chủ vẫn sẽ nhận biến 'thang' và 'nam' cũ đúng với nguyên gốc
       const { nam, thang, nviec } = tdtaiXoaCho; 
       gvDatTai(true, `🧹 Đang làm sạch dữ liệu cũ và chuyển sang ${thang}`); 
       gvGoiMayChu(nam, thang, nviec, ptuChoXoa, 'DELETE'); 
@@ -309,7 +308,7 @@
       ptuChoXoa.value = ""; 
     } 
     
-    // Khối lệnh: Phục hồi lại tháng năm cũ nếu Hủy thao tác chuyển tháng
+    // Phục hồi lại tháng năm cũ trên giao diện nếu Hủy thao tác
     if (tdtaiXoaCho && tdtaiXoaCho.thangCu) {
       document.getElementById('gvLocThang').value = tdtaiXoaCho.thangCu;
       document.getElementById('gvLocNam').value = tdtaiXoaCho.namCu;
