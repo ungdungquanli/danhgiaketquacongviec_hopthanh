@@ -10,6 +10,8 @@
     </div>
   </div>
 
+  <div id="aiToastMessage" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px 25px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: white; font-family: 'Times New Roman', serif; font-size: 16px; transition: opacity 0.3s ease-in-out; opacity: 0;"></div>
+  
   <div class="bg-light p-2 mb-2 rounded border" style="display: flex; gap: 10px; align-items: center; margin: 0 15px;">
     <span class="fw-bold text-success" style="white-space: nowrap;">🤖 Lệnh AI:</span>
     <input type="text" id="aiCommand" class="form-control form-control-sm" placeholder="VD: 'Chia cho 9'. Để trống tự động chia theo số tháng có điểm." style="max-width: 400px; font-family: 'Times New Roman', serif; font-size: 15px;">
@@ -43,26 +45,53 @@
     </div>
   </div>
 </div>
+
 <script>
 /* ==========================================================================
+   HÀM ĐIỀU KHIỂN GIAO DIỆN THÔNG BÁO NỔI (TOAST)
+   ========================================================================== */
+function showAIToast(message, type) {
+    let toast = document.getElementById("aiToastMessage");
+    toast.innerHTML = message;
+    
+    // Đổi màu nền tùy theo loại thông báo
+    if (type === "success") {
+        toast.style.background = "linear-gradient(to right, #15803d, #16a34a)";
+        toast.style.borderLeft = "5px solid #052e16";
+    } else if (type === "warning") {
+        toast.style.background = "linear-gradient(to right, #b45309, #d97706)";
+        toast.style.borderLeft = "5px solid #78350f";
+    } else {
+        toast.style.background = "linear-gradient(to right, #b91c1c, #dc2626)";
+        toast.style.borderLeft = "5px solid #450a0a";
+    }
+    
+    toast.style.display = "block";
+    // Độ trễ nhỏ để CSS Transition kịp nhận diện hiệu ứng Fade-in
+    setTimeout(() => { toast.style.opacity = "1"; }, 10);
+    
+    // Tự động mờ dần và ẩn đi sau 4 giây
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => { toast.style.display = "none"; }, 300);
+    }, 4000);
+}
+
+/* ==========================================================================
    HÀM TRỢ LÝ AI: ĐỌC DỮ LIỆU, TÍNH TOÁN VÀ ĐIỀN KẾT QUẢ XẾP LOẠI
-   (Đã nâng cấp: Thêm hiệu ứng Loading & Bẫy lỗi an toàn)
    ========================================================================== */
 function runAIAssistant() {
-    // 1. Hiệu ứng giao diện: Tìm nút bấm và chuyển sang trạng thái Đang xử lý
     let btn = document.querySelector("button[onclick='runAIAssistant()']");
     let originalText = "";
     if (btn) {
         originalText = btn.innerHTML;
         btn.innerHTML = "⏳ Đang tính toán...";
-        btn.disabled = true; // Khóa nút tránh bấm đúp
+        btn.disabled = true; 
         btn.style.opacity = "0.7";
     }
 
-    // 2. Dùng setTimeout để nhường luồng (thread) cho trình duyệt kịp hiển thị chữ "Đang tính toán..."
     setTimeout(() => {
         try {
-            // Phân tích lệnh
             let cmd = document.getElementById("aiCommand").value.toLowerCase();
             let customDivisor = null;
             let matchDiv = cmd.match(/chia\s*(?:cho\s*)?(\d+)/);
@@ -70,7 +99,6 @@ function runAIAssistant() {
                 customDivisor = parseInt(matchDiv[1]);
             }
 
-            // Lấy dữ liệu bảng
             let table = document.getElementById("bangThop");
             if (!table) throw new Error("Không tìm thấy bảng dữ liệu 'bangThop'.");
             
@@ -80,21 +108,18 @@ function runAIAssistant() {
             let rows = tbody.getElementsByTagName("tr");
             let updatedCount = 0;
 
-            // Quét từng dòng dữ liệu
             for (let i = 0; i < rows.length; i++) {
                 let row = rows[i];
                 let tds = row.getElementsByTagName("td");
                 
-                // Bỏ qua dòng chữ "Đang tải dữ liệu..." hoặc dòng sai cấu trúc
                 if (tds.length < 15) continue; 
 
                 let countHTXS = 0, countHTT = 0, countHT = 0, countCHT = 0;
                 let totalScore = 0;
                 let validMonths = 0;
 
-                // Quét từ cột T7 đến T6 (Index 3 đến 14)
                 for (let j = 3; j <= 14; j++) {
-                    if (!tds[j]) continue; // Chặn lỗi nếu ô không tồn tại
+                    if (!tds[j]) continue; 
                     
                     let cellText = tds[j].innerText.trim();
                     if (cellText === "" || cellText === "-" || cellText.includes("...")) continue;
@@ -125,11 +150,9 @@ function runAIAssistant() {
 
                 if (validMonths === 0) continue;
 
-                // Tính điểm
                 let D = customDivisor ? customDivisor : validMonths;
                 let avgScore = (totalScore / D).toFixed(1);
 
-                // Logic Xếp loại
                 let xepLoai = "Chưa hoàn thành";
                 if (countCHT > 0) {
                     xepLoai = "Chưa hoàn thành";
@@ -141,35 +164,33 @@ function runAIAssistant() {
                     xepLoai = "Hoàn thành";
                 }
 
-               // Ghi đè kết quả
                 if (tds[2]) {
                     tds[2].innerHTML = `<div style="text-align: center; line-height: 1.5;">
                                           <span style="color: #b91c1c; font-weight: bold;">${xepLoai}</span><br>
                                           <span style="font-weight: bold; color: #1e3a8a;">${avgScore} điểm</span>
                                         </div>`;
-                    tds[2].style.verticalAlign = "middle"; // Căn giữa theo chiều dọc
+                    tds[2].style.verticalAlign = "middle"; 
                     updatedCount++;
                 }
             }
 
-            // Thông báo kết quả
+            // Gọi hàm hiển thị thông báo thay vì dùng alert
             if (updatedCount > 0) {
-                alert("🤖 Trợ lý AI: Đã tính toán và điền kết quả thành công cho " + updatedCount + " người!");
+                showAIToast("✅ <b>Hoàn tất tính toán!</b><br>Đã điền kết quả tự động cho " + updatedCount + " cán bộ.", "success");
             } else {
-                alert("🤖 Trợ lý AI: Không có dòng nào được tính toán (chưa có điểm hoặc dữ liệu trống).");
+                showAIToast("⚠️ <b>Không có dữ liệu!</b><br>Các dòng dữ liệu đang trống, không thể tính toán.", "warning");
             }
 
         } catch (error) {
-            // Bắt và hiển thị lỗi nếu hệ thống ngầm bị vướng
-            alert("❌ AI gặp sự cố khi đọc dữ liệu: " + error.message);
+            // Hiển thị lỗi màu đỏ nếu xảy ra sự cố
+            showAIToast("❌ <b>Hệ thống gặp sự cố:</b><br>" + error.message, "error");
         } finally {
-            // 3. Phục hồi trạng thái nút bấm dù thành công hay thất bại
             if (btn) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 btn.style.opacity = "1";
             }
         }
-    }, 150); // Độ trễ 150ms để UI kịp phản hồi
+    }, 150); 
 }
 </script>
