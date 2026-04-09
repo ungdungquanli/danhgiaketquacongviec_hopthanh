@@ -23,7 +23,7 @@
           <tr>
             <th class="text-center align-middle" style="width: 50px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">STT</th>
             <th class="text-center align-middle" style="min-width: 150px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">Họ và tên</th> 
-            <th class="text-center align-middle" style="min-width: 80px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">Kết quả xếp loại</th>
+            <th class="text-center align-middle" style="min-width: 150px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">Kết quả xếp loại</th>
             <th class="text-center align-middle" style="width: 100px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">T7</th>
             <th class="text-center align-middle" style="width: 100px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">T8</th>
             <th class="text-center align-middle" style="width: 100px; position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important;">T9</th>
@@ -141,9 +141,13 @@ function runAIAssistant() {
                     xepLoai = "Hoàn thành";
                 }
 
-                // Ghi đè kết quả
+               // Ghi đè kết quả
                 if (tds[2]) {
-                    tds[2].innerHTML = `<span style="color: #b91c1c; font-weight: bold;">${xepLoai}</span><br><span style="font-weight: bold; color: #1e3a8a;">${avgScore} điểm</span>`;
+                    tds[2].innerHTML = `<div style="text-align: center; line-height: 1.5;">
+                                          <span style="color: #b91c1c; font-weight: bold;">${xepLoai}</span><br>
+                                          <span style="font-weight: bold; color: #1e3a8a;">${avgScore} điểm</span>
+                                        </div>`;
+                    tds[2].style.verticalAlign = "middle"; // Căn giữa theo chiều dọc
                     updatedCount++;
                 }
             }
