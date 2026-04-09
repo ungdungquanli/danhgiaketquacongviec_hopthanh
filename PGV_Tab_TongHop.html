@@ -46,99 +46,126 @@
 <script>
 /* ==========================================================================
    HÀM TRỢ LÝ AI: ĐỌC DỮ LIỆU, TÍNH TOÁN VÀ ĐIỀN KẾT QUẢ XẾP LOẠI
+   (Đã nâng cấp: Thêm hiệu ứng Loading & Bẫy lỗi an toàn)
    ========================================================================== */
 function runAIAssistant() {
-    // 1. Phân tích lệnh từ ô nhập liệu
-    let cmd = document.getElementById("aiCommand").value.toLowerCase();
-    let customDivisor = null;
-    let matchDiv = cmd.match(/chia\s*(?:cho\s*)?(\d+)/); // Bắt các từ khóa như "chia 9", "chia cho 8"
-    if (matchDiv && matchDiv[1]) {
-        customDivisor = parseInt(matchDiv[1]);
+    // 1. Hiệu ứng giao diện: Tìm nút bấm và chuyển sang trạng thái Đang xử lý
+    let btn = document.querySelector("button[onclick='runAIAssistant()']");
+    let originalText = "";
+    if (btn) {
+        originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Đang tính toán...";
+        btn.disabled = true; // Khóa nút tránh bấm đúp
+        btn.style.opacity = "0.7";
     }
 
-    // 2. Lấy dữ liệu bảng
-    let table = document.getElementById("bangThop");
-    let tbody = table.getElementsByTagName("tbody")[0];
-    let rows = tbody.getElementsByTagName("tr");
+    // 2. Dùng setTimeout để nhường luồng (thread) cho trình duyệt kịp hiển thị chữ "Đang tính toán..."
+    setTimeout(() => {
+        try {
+            // Phân tích lệnh
+            let cmd = document.getElementById("aiCommand").value.toLowerCase();
+            let customDivisor = null;
+            let matchDiv = cmd.match(/chia\s*(?:cho\s*)?(\d+)/);
+            if (matchDiv && matchDiv[1]) {
+                customDivisor = parseInt(matchDiv[1]);
+            }
 
-    let updatedCount = 0;
+            // Lấy dữ liệu bảng
+            let table = document.getElementById("bangThop");
+            if (!table) throw new Error("Không tìm thấy bảng dữ liệu 'bangThop'.");
+            
+            let tbody = table.getElementsByTagName("tbody")[0];
+            if (!tbody) throw new Error("Bảng chưa có nội dung body.");
+            
+            let rows = tbody.getElementsByTagName("tr");
+            let updatedCount = 0;
 
-    // 3. Quét từng dòng dữ liệu
-    for (let i = 0; i < rows.length; i++) {
-        let row = rows[i];
-        let tds = row.getElementsByTagName("td");
-        
-        // Bỏ qua dòng chữ "Đang tải dữ liệu..."
-        if (tds.length < 15) continue; 
+            // Quét từng dòng dữ liệu
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let tds = row.getElementsByTagName("td");
+                
+                // Bỏ qua dòng chữ "Đang tải dữ liệu..." hoặc dòng sai cấu trúc
+                if (tds.length < 15) continue; 
 
-        let countHTXS = 0, countHTT = 0, countHT = 0, countCHT = 0;
-        let totalScore = 0;
-        let validMonths = 0; // Đếm số tháng thực tế có dữ liệu
+                let countHTXS = 0, countHTT = 0, countHT = 0, countCHT = 0;
+                let totalScore = 0;
+                let validMonths = 0;
 
-        // Quét từ cột T7 đến T6 (Index 3 đến 14)
-        for (let j = 3; j <= 14; j++) {
-            let cellText = tds[j].innerText.trim();
-            if (cellText === "" || cellText === "-" || cellText.includes("...")) continue;
+                // Quét từ cột T7 đến T6 (Index 3 đến 14)
+                for (let j = 3; j <= 14; j++) {
+                    if (!tds[j]) continue; // Chặn lỗi nếu ô không tồn tại
+                    
+                    let cellText = tds[j].innerText.trim();
+                    if (cellText === "" || cellText === "-" || cellText.includes("...")) continue;
 
-            // Tách lấy con số điểm (nếu có)
-            let diem = 0;
-            let matchDiem = cellText.match(/(\d+)/);
-            if (matchDiem) diem = parseFloat(matchDiem[1]);
+                    let diem = 0;
+                    let matchDiem = cellText.match(/(\d+)/);
+                    if (matchDiem) diem = parseFloat(matchDiem[1]);
 
-            // Quy đổi công thức tính điểm bằng chữ
-            let textLower = cellText.toLowerCase();
-            if (textLower.includes("xuất sắc")) {
-                totalScore += (90 + diem);
-                countHTXS++;
-                validMonths++;
-            } else if (textLower.includes("chưa hoàn thành")) {
-                totalScore += diem; // CHT chỉ cộng điểm gốc
-                countCHT++;
-                validMonths++;
-            } else if (textLower.includes("tốt")) {
-                totalScore += (85 + diem);
-                countHTT++;
-                validMonths++;
-            } else if (textLower.includes("hoàn thành")) {
-                totalScore += (75 + diem);
-                countHT++;
-                validMonths++;
+                    let textLower = cellText.toLowerCase();
+                    if (textLower.includes("xuất sắc")) {
+                        totalScore += (90 + diem);
+                        countHTXS++;
+                        validMonths++;
+                    } else if (textLower.includes("chưa hoàn thành")) {
+                        totalScore += diem;
+                        countCHT++;
+                        validMonths++;
+                    } else if (textLower.includes("tốt")) {
+                        totalScore += (85 + diem);
+                        countHTT++;
+                        validMonths++;
+                    } else if (textLower.includes("hoàn thành")) {
+                        totalScore += (75 + diem);
+                        countHT++;
+                        validMonths++;
+                    }
+                }
+
+                if (validMonths === 0) continue;
+
+                // Tính điểm
+                let D = customDivisor ? customDivisor : validMonths;
+                let avgScore = (totalScore / D).toFixed(1);
+
+                // Logic Xếp loại
+                let xepLoai = "Chưa hoàn thành";
+                if (countCHT > 0) {
+                    xepLoai = "Chưa hoàn thành";
+                } else if ((countHTXS / validMonths) >= 0.3 && (countHTXS + countHTT === validMonths)) {
+                    xepLoai = "Hoàn thành xuất sắc";
+                } else if (((countHTXS + countHTT) / validMonths) >= 0.7 && (countHTXS + countHTT + countHT === validMonths)) {
+                    xepLoai = "Hoàn thành tốt";
+                } else if ((countHTXS + countHTT + countHT) === validMonths) {
+                    xepLoai = "Hoàn thành";
+                }
+
+                // Ghi đè kết quả
+                if (tds[2]) {
+                    tds[2].innerHTML = `<span style="color: #b91c1c; font-weight: bold;">${xepLoai}</span><br><span style="font-weight: bold; color: #1e3a8a;">${avgScore} điểm</span>`;
+                    updatedCount++;
+                }
+            }
+
+            // Thông báo kết quả
+            if (updatedCount > 0) {
+                alert("🤖 Trợ lý AI: Đã tính toán và điền kết quả thành công cho " + updatedCount + " người!");
+            } else {
+                alert("🤖 Trợ lý AI: Không có dòng nào được tính toán (chưa có điểm hoặc dữ liệu trống).");
+            }
+
+        } catch (error) {
+            // Bắt và hiển thị lỗi nếu hệ thống ngầm bị vướng
+            alert("❌ AI gặp sự cố khi đọc dữ liệu: " + error.message);
+        } finally {
+            // 3. Phục hồi trạng thái nút bấm dù thành công hay thất bại
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = "1";
             }
         }
-
-        // Bỏ qua nếu dòng này không có tháng nào được chấm điểm
-        if (validMonths === 0) continue;
-
-        // 4. Tính toán điểm trung bình
-        let D = customDivisor ? customDivisor : validMonths;
-        let avgScore = (totalScore / D).toFixed(1); // Lấy 1 chữ số thập phân
-
-        // 5. Xử lý logic Xếp loại Cuối năm
-        let xepLoai = "Chưa hoàn thành";
-        
-        if (countCHT > 0) {
-            // Có tháng Chưa hoàn thành -> Chưa hoàn thành
-            xepLoai = "Chưa hoàn thành";
-        } else if ((countHTXS / validMonths) >= 0.3 && (countHTXS + countHTT === validMonths)) {
-            // Đạt 30% HTXS trở lên và phần còn lại là HTT
-            xepLoai = "Hoàn thành xuất sắc";
-        } else if (((countHTXS + countHTT) / validMonths) >= 0.7 && (countHTXS + countHTT + countHT === validMonths)) {
-            // Đạt 70% HTT trở lên (tính cả HTXS) và phần còn lại là HT
-            xepLoai = "Hoàn thành tốt";
-        } else if ((countHTXS + countHTT + countHT) === validMonths) {
-            // 100% đạt từ Hoàn thành trở lên
-            xepLoai = "Hoàn thành";
-        }
-
-        // 6. Ghi đè vào Cột "Kết quả xếp loại" (Cột số 3, index 2)
-        tds[2].innerHTML = `<span style="color: #b91c1c; font-weight: bold;">${xepLoai}</span><br><span style="font-weight: bold; color: #1e3a8a;">${avgScore} điểm</span>`;
-        updatedCount++;
-    }
-
-    if (updatedCount > 0) {
-        alert("🤖 Trợ lý AI: Đã hoàn tất tính toán và điền kết quả cho " + updatedCount + " người!");
-    } else {
-        alert("🤖 Trợ lý AI: Chưa có dữ liệu điểm để tính toán.");
-    }
+    }, 150); // Độ trễ 150ms để UI kịp phản hồi
 }
-  <script>
+</script>
