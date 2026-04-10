@@ -35,5 +35,6 @@ const khachApi = {
     gvXulyNviec: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("gvxulynviec", { tdtai: tdtai }, khiTcong, khiLoi); },
     gvLaydlBdau: function(khiTcong, khiLoi) { this.yeucauApi("gvlaydlbdau", {}, khiTcong, khiLoi); },
     taiTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("taitepbcao", { tdtai: tdtai }, khiTcong, khiLoi); },
-    xoaTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("xoatepbcao", { tdtai: tdtai }, khiTcong, khiLoi); }
+    xoaTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("xoatepbcao", { tdtai: tdtai }, khiTcong, khiLoi); },
+    hoiDapAi: function(cauHoi, khiTcong, khiLoi) { this.yeucauApi("hoidapai", { cauhoi: cauHoi }, khiTcong, khiLoi); }
 };
