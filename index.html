@@ -336,7 +336,7 @@
         dlt.forEach(pt => hs.append(`<option value="${pt.gtri}">${pt.tenn}</option>`));
         hs.off('change').on('change', function() {
           const tcd = $(this).val();
-          if (tcd) { datTaiDl(true, "Đang chuyển dữ liệu..."); khachApi.layDlCanb(tcd, window.PGV_ID_TC, khiTaiDlXong, khiLoiMayChu); }
+          if (tcd) { datTaiDl(true, "Đang GỌI dữ liệu..."); khachApi.layDlCanb(tcd, window.PGV_ID_TC, khiTaiDlXong, khiLoiMayChu); }
         });
       }, khiLoiMayChu);
     }
