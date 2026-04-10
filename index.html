@@ -24,6 +24,10 @@
     .vongXoay { width: 60px; height: 60px; border: 5px solid rgba(0, 0, 0, 0.1); border-left-color: #0d6efd; border-top-color: #dc3545; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     .chuTai { font-family: 'Segoe UI', Arial, sans-serif; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(45deg, #0d6efd, #6610f2, #dc3545, #0d6efd); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 3s ease infinite; }
 
+    /* Bổ sung lại cấu trúc hiệu ứng chuyển động (Keyframes) bị thiếu */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
     .khuTheDev { position: fixed; bottom: 20px; left: 20px; z-index: 9999; display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%); border-radius: 50px; box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3); color: white; cursor: default; user-select: none; }
     .khuTheDev:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(13, 110, 253, 0.5); }
     .cotChuDev { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
