@@ -46,6 +46,83 @@
   </div>
 </div>
 
+<style>
+  .ai-chat-widget {
+     position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .ai-chat-button {
+     width: 60px; height: 60px; border-radius: 50%;
+     background: linear-gradient(135deg, #0d6efd, #6610f2); color: white;
+     border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+     font-size: 26px; cursor: pointer; transition: all 0.3s ease;
+     display: flex; align-items: center; justify-content: center;
+  }
+  .ai-chat-button:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+  .ai-chat-panel {
+     display: none; width: 400px; height: 550px; max-height: 85vh;
+     background: #ffffff; border-radius: 16px;
+     box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+     flex-direction: column; overflow: hidden;
+     position: absolute; bottom: 85px; right: 0;
+     border: 1px solid #eaeaea;
+  }
+  .ai-chat-header {
+     background: linear-gradient(135deg, #0d6efd, #6610f2); color: white;
+     padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .ai-chat-header-title { font-weight: 600; margin: 0; font-size: 16px; display: flex; align-items: center; gap: 10px;}
+  .ai-chat-close { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 20px; cursor: pointer; transition: color 0.2s;}
+  .ai-chat-close:hover { color: #ffffff; }
+  .ai-chat-body {
+     flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa;
+     display: flex; flex-direction: column; gap: 16px;
+  }
+  .ai-message { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; line-height: 1.5; word-wrap: break-word;}
+  .ai-message.user { background: #0d6efd; color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 2px 5px rgba(13,110,253,0.2);}
+  .ai-message.bot { background: white; color: #333; border: 1px solid #e9ecef; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);}
+  .ai-message.bot strong { color: #0d6efd; }
+  .ai-chat-footer {
+     padding: 16px; background: white; border-top: 1px solid #eaeaea; display: flex; gap: 12px; align-items: center;
+  }
+  .ai-chat-input {
+     flex: 1; border: 1px solid #ced4da; border-radius: 24px; padding: 10px 18px;
+     outline: none; font-size: 14.5px; transition: border-color 0.2s, box-shadow 0.2s;
+     background: #f8f9fa;
+  }
+  .ai-chat-input:focus { border-color: #0d6efd; background: #ffffff; box-shadow: 0 0 0 3px rgba(13,110,253,0.1); }
+  .ai-chat-send {
+     background: #0d6efd; color: white; border: none; border-radius: 50%;
+     width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+     cursor: pointer; transition: background 0.2s; font-size: 16px;
+  }
+  .ai-chat-send:hover { background: #0b5ed7; }
+  .ai-typing { font-size: 13px; color: #6c757d; font-style: italic; display: none; margin-top: -8px; margin-left: 8px;}
+  .ai-chat-body::-webkit-scrollbar { width: 6px; }
+  .ai-chat-body::-webkit-scrollbar-track { background: transparent; }
+  .ai-chat-body::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 10px; }
+</style>
+
+<div class="ai-chat-widget">
+  <div class="ai-chat-panel" id="aiChatPanel">
+    <div class="ai-chat-header">
+      <h6 class="ai-chat-header-title"><i class="bi bi-robot"></i> Trợ lý Hệ thống - NotebookLM</h6>
+      <button class="ai-chat-close" onclick="dongMoChatAI()" title="Đóng"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="ai-chat-body" id="aiChatBody">
+      <div class="ai-message bot">Kính chào ban lãnh đạo nhà trường. Tôi là hệ thống phân tích dữ liệu AI tích hợp. Thầy cần khai thác thông tin gì từ các văn bản tài liệu ạ?</div>
+    </div>
+    <div class="ai-typing" id="aiTyping"><div class="spinner-grow spinner-grow-sm text-primary" role="status"></div> AI đang phân tích dữ liệu...</div>
+    <div class="ai-chat-footer">
+      <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Nhập câu hỏi tra cứu..." onkeypress="xuLyPhimEnterAI(event)">
+      <button class="ai-chat-send" onclick="guiCauHoiAI()" title="Gửi câu hỏi"><i class="bi bi-send-fill"></i></button>
+    </div>
+  </div>
+  <button class="ai-chat-button" onclick="dongMoChatAI()" title="Mở Trợ lý AI">
+    <i class="bi bi-chat-square-text-fill"></i>
+  </button>
+</div>
+
 <script>
 /* ==========================================================================
    HÀM ĐIỀU KHIỂN GIAO DIỆN THÔNG BÁO NỔI (TOAST)
@@ -67,10 +144,8 @@ function showAIToast(message, type) {
     }
     
     toast.style.display = "block";
-    // Độ trễ nhỏ để CSS Transition kịp nhận diện hiệu ứng Fade-in
     setTimeout(() => { toast.style.opacity = "1"; }, 10);
     
-    // Tự động mờ dần và ẩn đi sau 4 giây
     setTimeout(() => {
         toast.style.opacity = "0";
         setTimeout(() => { toast.style.display = "none"; }, 300);
@@ -174,7 +249,6 @@ function runAIAssistant() {
                 }
             }
 
-            // Gọi hàm hiển thị thông báo thay vì dùng alert
             if (updatedCount > 0) {
                 showAIToast("✅ <b>Hoàn tất tính toán!</b><br>Đã điền kết quả tự động cho " + updatedCount + " cán bộ.", "success");
             } else {
@@ -182,7 +256,6 @@ function runAIAssistant() {
             }
 
         } catch (error) {
-            // Hiển thị lỗi màu đỏ nếu xảy ra sự cố
             showAIToast("❌ <b>Hệ thống gặp sự cố:</b><br>" + error.message, "error");
         } finally {
             if (btn) {
@@ -192,5 +265,69 @@ function runAIAssistant() {
             }
         }
     }, 150); 
+}
+
+/* ==========================================================================
+   HÀM TRỢ LÝ AI: KHUNG CHAT NOTEBOOK LM
+   ========================================================================== */
+function dongMoChatAI() {
+  var panel = document.getElementById("aiChatPanel");
+  if (panel.style.display === "flex") {
+    panel.style.display = "none";
+  } else {
+    panel.style.display = "flex";
+    document.getElementById("aiChatInput").focus();
+  }
+}
+
+function xuLyPhimEnterAI(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    guiCauHoiAI();
+  }
+}
+
+function guiCauHoiAI() {
+  var input = document.getElementById("aiChatInput");
+  var text = input.value.trim();
+  if (!text) return;
+  
+  themTinNhanUI("user", text);
+  input.value = "";
+  
+  document.getElementById("aiTyping").style.display = "flex";
+  document.getElementById("aiChatBody").scrollTop = document.getElementById("aiChatBody").scrollHeight;
+  
+  khachApi.hoiDapAi(text, 
+    function(kq) {
+       document.getElementById("aiTyping").style.display = "none";
+       if(kq && kq.ttai === "tcong") {
+          themTinNhanUI("bot", kq.tra_loi);
+       } else {
+          themTinNhanUI("bot", "Lỗi xử lý: " + (kq.tbao || "Hệ thống AI tạm thời không phản hồi."));
+       }
+    },
+    function(loi) {
+       document.getElementById("aiTyping").style.display = "none";
+       themTinNhanUI("bot", "Hệ thống gặp sự cố kết nối. Vui lòng thử lại sau.");
+    }
+  );
+}
+
+function themTinNhanUI(loai, noiDung) {
+  var chatBody = document.getElementById("aiChatBody");
+  var div = document.createElement("div");
+  div.className = "ai-message " + loai;
+  
+  if(loai === "bot") {
+     let htmlContent = noiDung.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+     htmlContent = htmlContent.replace(/\n/g, "<br>");
+     div.innerHTML = htmlContent;
+  } else {
+     div.textContent = noiDung;
+  }
+  
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight; 
 }
 </script>
