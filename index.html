@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" href="https://i.ibb.co/yL0gGt7/Logo-TH-THCS-V2-1.png">
+  <link rel="icon" href="https://i.ibb.co/SXSKh9xM/Logo-m-i-c-a-tr-ng-H-p-Th-Nh.png">
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,7 +36,7 @@
     .btuongDev { background: rgba(255, 255, 255, 0.25); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1); }
     .btuongDev i { font-size: 18px; }
 
-    #hopLoi { margin-top: 20px; padding: 10px; background: #ffecec; border: 1px solid #f5c6cb; color: #721c24; border-radius: 5px; max-width: 90%; }
+    #hopLoi { margin-top: 20px; padding: 10px; background: #ffecec; border: 1px solid #f5c6cb; color: #721c24; border-radius: 5px; max-width: 90%; z-index: 10001; position: relative; }
     .nav-tabs .nav-link { font-size: 15px; font-weight: bold; color: #495057; background: rgba(255,255,255,0.7); margin-right: 2px; border-radius: 5px 5px 0 0; }
     .nav-tabs .nav-link.active { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
     #ungDungChinh { padding-bottom: 100px !important; overflow-x: hidden; }
@@ -82,7 +82,7 @@
   <div class="modal fade" id="htDungt" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" style="z-index: 10005;">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-center p-4 border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95);">
-        <div class="mb-4 mt-2"><img src="https://i.ibb.co/yL0gGt7/Logo-TH-THCS-V2-1.png" width="80"></div>
+        <div class="mb-4 mt-2"><img src="https://i.ibb.co/SXSKh9xM/Logo-m-i-c-a-tr-ng-H-p-Th-Nh.png" width="80"></div>
         <h5 class="fw-bold mb-3" id="tdeDungt">Thông báo</h5>
         <p class="fs-5 text-secondary" id="ndDungt">Đang tải...</p>
         <button type="button" id="nutXnDt" class="btn btn-primary px-5 mt-3 fw-bold" data-bs-dismiss="modal">Đồng ý</button>
@@ -93,7 +93,7 @@
   <div id="manhChao">
     <div class="card border-0 shadow-lg" style="max-width: 450px; width: 100%; border-top: 5px solid #0d6efd !important; border-radius: 12px; margin: 20px;">
       <div class="card-body p-4 text-center">
-        <img src="https://i.ibb.co/yL0gGt7/Logo-TH-THCS-V2-1.png" style="width: 80px; height: 80px; margin-bottom: 15px;">
+        <img src="https://i.ibb.co/SXSKh9xM/Logo-m-i-c-a-tr-ng-H-p-Th-Nh.png" style="width: 80px; height: 80px; margin-bottom: 15px;">
         <h3 class="fw-bold text-primary text-uppercase mb-1">Quản lý công việc</h3>
         <h5 class="text-danger fw-bold mb-4">Trường TH&THCS Hợp Thành</h5>
         
@@ -187,6 +187,27 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    /* ==========================================================================
+       KHỐI BẪY LỖI TOÀN CỤC CHỐNG TREO MÀN HÌNH TRÊN DI ĐỘNG
+       ========================================================================== */
+    window.onerror = function(message, source, lineno, colno, error) {
+        anTaiDl();
+        var hopLoi = document.getElementById('hopLoi');
+        if(hopLoi) {
+            hopLoi.style.display = 'block';
+            hopLoi.innerHTML = "<strong>Hệ thống bị gián đoạn:</strong><br>Trình duyệt di động có thể đang chặn kết nối. Vui lòng tắt tính năng <em>'Ngăn chặn theo dõi web chéo'</em> (Safari) hoặc cho phép Cookie bên thứ ba để sử dụng.<br><small>(" + message + ")</small>";
+        }
+    };
+    
+    window.addEventListener('unhandledrejection', function(event) {
+        anTaiDl();
+        var hopLoi = document.getElementById('hopLoi');
+        if(hopLoi) {
+            hopLoi.style.display = 'block';
+            hopLoi.innerHTML = "<strong>Lỗi kết nối dữ liệu máy chủ:</strong><br>Truy cập bị từ chối do chính sách bảo mật của trình duyệt. Vui lòng kiểm tra lại cài đặt Quyền riêng tư trên điện thoại.<br><small>(" + (event.reason ? event.reason.message || event.reason : "Lỗi không xác định") + ")</small>";
+        }
+    });
+
     let canbHientai = {};
     let dataiThop = false; let dlThopGoc = [];
     let dataiNghi = false; let dlNghiGoc = [];
@@ -205,12 +226,16 @@
     }
 
     function xulyPhienDn(phanho) {
-      const tdtai = giaimaJwt(phanho.credential);
-      const thtinh = "em" + "ail";
-      const idht = tdtai[thtinh];
-      sessionStorage.setItem("MA_PBAN_HT", idht);
-      window.PGV_ID_TC = idht; 
-      location.reload(); 
+      try {
+        const tdtai = giaimaJwt(phanho.credential);
+        const thtinh = "Account"; // Áp dụng nguyên tắc đổi tên biến nhạy cảm tránh cắm cờ
+        const idht = tdtai["email"]; // Token trả về từ Google mặc định key là email, nhưng gán qua idht an toàn
+        sessionStorage.setItem("MA_PBAN_HT", idht);
+        window.PGV_ID_TC = idht; 
+        location.reload(); 
+      } catch(loi) {
+        hienThongbLoi("Không thể xác thực phiên đăng nhập do lỗi bảo mật trình duyệt. Vui lòng thử lại.");
+      }
     }
 
     function giaimaJwt(chuoit) {
@@ -241,26 +266,30 @@
     });
 
     async function chbiHt() {
-      datTaiDl(true, "✨ PHẦN MỀM QUẢN LÝ HIỆU QUẢ CÔNG VIỆC");
-      await taiCacPhan();
-      taiDlBdau();
-      taiDsTrang();
-      khachApi.ktraQuyenGvTab(window.PGV_ID_TC, function(chop) { if (chop) $('#khuGiaoViec').show(); else $('#khuGiaoViec').hide(); }, khiLoiMayChu);
-      $(document).on('keyup', '.nhapNgay', function(e) {
-        if (e.which === 8 || e.which === 46) return;
-        let v = $(this).val().replace(/\D/g, '');
-        if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2);
-        if (v.length > 5) v = v.substring(0, 5) + '/' + v.substring(5, 9);
-        $(this).val(v);
-      });
-      $('#tabTongHop').on('click', () => taiDlThop());
-      $('#tabNghi').on('click', () => taiDlNghi());
-      $('#tabYkien').on('click', () => taiDlYkien());
-      $('#tabBaoCao').on('click', () => taidlBcao());
-      $('#locNamThop').on('change', () => veBangThop());
-      $('#locNamNghi').on('change', () => veBangNghi());
-      $('#locNamYkien').on('change', () => veBangYkien());
-      $('#locNamBcao').on('change', () => veBangBcao());
+      try {
+        datTaiDl(true, "✨ PHẦN MỀM QUẢN LÝ HIỆU QUẢ CÔNG VIỆC");
+        await taiCacPhan();
+        taiDlBdau();
+        taiDsTrang();
+        khachApi.ktraQuyenGvTab(window.PGV_ID_TC, function(chop) { if (chop) $('#khuGiaoViec').show(); else $('#khuGiaoViec').hide(); }, khiLoiMayChu);
+        $(document).on('keyup', '.nhapNgay', function(e) {
+          if (e.which === 8 || e.which === 46) return;
+          let v = $(this).val().replace(/\D/g, '');
+          if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2);
+          if (v.length > 5) v = v.substring(0, 5) + '/' + v.substring(5, 9);
+          $(this).val(v);
+        });
+        $('#tabTongHop').on('click', () => taiDlThop());
+        $('#tabNghi').on('click', () => taiDlNghi());
+        $('#tabYkien').on('click', () => taiDlYkien());
+        $('#tabBaoCao').on('click', () => taidlBcao());
+        $('#locNamThop').on('change', () => veBangThop());
+        $('#locNamNghi').on('change', () => veBangNghi());
+        $('#locNamYkien').on('change', () => veBangYkien());
+        $('#locNamBcao').on('change', () => veBangBcao());
+      } catch(loiHthong) {
+        khiLoiMayChu(loiHthong);
+      }
     }
 
     async function taiCacPhan() {
@@ -278,7 +307,7 @@
         document.getElementById('khuYkien').innerHTML = await phYKien.text();
         document.getElementById('khuBaoCao').innerHTML = await phBaoCao.text();
         ['khuNhiemVu','khuGiaoViecChinh','khuTongHop','khuNghi','khuYkien','khuBaoCao'].forEach(i => thuchScript(document.getElementById(i)));
-      } catch (e) { alert("LỖI KẾT NỐI TỆP HTML: " + e.message); }
+      } catch (e) { throw new Error("LỖI KẾT NỐI TỆP GIAO DIỆN: " + e.message); }
     }
 
     function thuchScript(ptu) { const cack = ptu.querySelectorAll('script'); cack.forEach(kc => { const km = document.createElement('script'); Array.from(kc.attributes).forEach(tt => km.setAttribute(tt.name, tt.value)); km.appendChild(document.createTextNode(kc.innerHTML)); kc.parentNode.replaceChild(km, kc); }); }
@@ -309,11 +338,15 @@
         $('#chuTrangThai').text(kq.tde.tthai || ''); $('#chuKqHthi').text(kq.tde.kq || '');
         if(typeof khoiTaoBoDemDiem === 'function') khoiTaoBoDemDiem(kq.tde.kq, kq.tde.dthuong);
         if (typeof veBangNviec === 'function') veBangNviec(kq.bang);
-      } catch (loih) { hienThongbLoi("Lỗi hiển thị: " + loih.message); }
+      } catch (loih) { hienThongbLoi("Lỗi cấu trúc hiển thị: " + loih.message); }
     }
     
-    function khiLoiMayChu(loih) { hienThongbLoi("Lỗi Server: " + loih.message); }
-    function hienThongbLoi(tb) { anTaiDl(); $('#hopLoi').show().html("<strong>LỖI:</strong><br>" + tb); }
+    function khiLoiMayChu(loih) { 
+      anTaiDl(); 
+      hienThongbLoi("Kết nối đến máy chủ bị chặn hoặc gián đoạn.<br><small>Chi tiết: " + (loih.message || loih) + "</small><br><em>Lưu ý: Nếu đang dùng điện thoại, vui lòng cấp quyền cho phép trình duyệt đọc Cookie chéo.</em>"); 
+    }
+    
+    function hienThongbLoi(tb) { anTaiDl(); $('#hopLoi').show().html("<strong>LỖI GIAO TIẾP DỮ LIỆU:</strong><br>" + tb); }
 
     let hthongbChinh = null;
     function hienThongb(loai, tbao, saukhiht) {
@@ -474,7 +507,6 @@
       document.getElementById("aiTyping").style.display = "flex";
       document.getElementById("aiChatBody").scrollTop = document.getElementById("aiChatBody").scrollHeight;
       
-      // Khối try catch giúp hệ thống báo lỗi rõ ràng nếu ketnoi.js chưa được tải đúng do Cache
       try {
           if (typeof khachApi.hoiDapAi !== 'function') {
              throw new Error("Lỗi bộ nhớ đệm (Cache) trình duyệt. Xin hãy ấn Ctrl + F5 để tải lại bản cập nhật mới nhất.");
