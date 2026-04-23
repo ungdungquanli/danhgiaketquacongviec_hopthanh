@@ -1,25 +1,25 @@
 /* ========================================================================== */
 
-const ddungApi = "https://script.google.com/macros/s/AKfycbwx-SfK2k6Sgf2oLQCu1Jt55clwz0nuke8YUVv8QgttrmqxgcDti7c8WA8x8jzh5CHy/exec"; 
+var ddungApi = "https://script.google.com/macros/s/AKfycbwx-SfK2k6Sgf2oLQCu1Jt55clwz0nuke8YUVv8QgttrmqxgcDti7c8WA8x8jzh5CHy/exec"; 
 
-const khachApi = {
+window.khachApi = {
     yeucauApi: function(hdong, tdtai, khiTcong, khiLoi) {
-        const dlieu = { hdong: hdong, ...tdtai };
+        var dlieu = { hdong: hdong, ...tdtai };
         fetch(ddungApi, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
             body: JSON.stringify(dlieu)
         })
-        .then(ph => ph.json())
-        .then(kq => {
+        .then(function(ph) { return ph.json(); })
+        .then(function(kq) {
             if (kq.ttai === 'loi') {
                 if (khiLoi) khiLoi(new Error(kq.tbao));
             } else {
-                let dcuoi = (kq.dliu !== undefined) ? kq.dliu : kq;
+                var dcuoi = (kq.dliu !== undefined) ? kq.dliu : kq;
                 if (khiTcong) khiTcong(dcuoi);
             }
         })
-        .catch(loie => { if (khiLoi) khiLoi(loie); });
+        .catch(function(loie) { if (khiLoi) khiLoi(loie); });
     },
     layDlCanb: function(ttrang, taik, khiTcong, khiLoi) { this.yeucauApi("laydlcanb", { ttrang: ttrang, tkcanb: taik }, khiTcong, khiLoi); },
     luuTam: function(dldeu, khiTcong, khiLoi) { this.yeucauApi("luutam", { dldeu: dldeu }, khiTcong, khiLoi); },
@@ -36,6 +36,6 @@ const khachApi = {
     gvLaydlBdau: function(khiTcong, khiLoi) { this.yeucauApi("gvlaydlbdau", {}, khiTcong, khiLoi); },
     taiTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("taitepbcao", { tdtai: tdtai }, khiTcong, khiLoi); },
     xoaTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("xoatepbcao", { tdtai: tdtai }, khiTcong, khiLoi); },
-    hoiDapAi: function(cauHoi, khiTcong, khiLoi) { this.yeucauApi("hoidapai", { cauhoi: cauHoi }, khiTcong, khiLoi); }
+    hoiDapAi: function(cauHoi, khiTcong, khiLoi) { this.yeucauApi("hoidapai", { cauhoi: cauHoi }, khiTcong, khiLoi); },
     ghiKetQuaThop: function(dl, khiTcong, khiLoi) { this.yeucauApi("ghiketquathop", { dldeu: dl }, khiTcong, khiLoi); }
 };
