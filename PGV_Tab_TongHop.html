@@ -212,7 +212,10 @@ function ghiKetQuaAI() {
         // Trích xuất văn bản kết quả bỏ qua định dạng HTML màu sắc
         if (htmlKq.innerText.trim() !== "") {
             let theSpan = htmlKq.getElementsByTagName("span");
-            if (theSpan.length > 0) {
+            if (theSpan.length > 1) {
+                // Đã cập nhật: Lấy cả 2 thẻ span (Chữ xếp loại và Điểm số), nối bằng dấu xuống dòng (\n)
+                xepLoai = theSpan[0].innerText.trim() + "\n" + theSpan[1].innerText.trim();
+            } else if (theSpan.length > 0) {
                 xepLoai = theSpan[0].innerText.trim();
             } else {
                 xepLoai = htmlKq.innerText.trim();
