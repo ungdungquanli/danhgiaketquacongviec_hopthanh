@@ -37,4 +37,5 @@ const khachApi = {
     taiTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("taitepbcao", { tdtai: tdtai }, khiTcong, khiLoi); },
     xoaTepBcao: function(tdtai, khiTcong, khiLoi) { this.yeucauApi("xoatepbcao", { tdtai: tdtai }, khiTcong, khiLoi); },
     hoiDapAi: function(cauHoi, khiTcong, khiLoi) { this.yeucauApi("hoidapai", { cauhoi: cauHoi }, khiTcong, khiLoi); }
+    ghiKetQuaThop: function(dl, khiTcong, khiLoi) { this.yeucauApi("ghiketquathop", { dldeu: dl }, khiTcong, khiLoi); }
 };
