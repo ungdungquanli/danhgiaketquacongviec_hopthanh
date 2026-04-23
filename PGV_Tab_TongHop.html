@@ -55,7 +55,6 @@ function showAIToast(message, type) {
     let toast = document.getElementById("aiToastMessage");
     toast.innerHTML = message;
     
-    // Đổi màu nền tùy theo loại thông báo
     if (type === "success") {
         toast.style.background = "linear-gradient(to right, #15803d, #16a34a)";
         toast.style.borderLeft = "5px solid #052e16";
@@ -68,10 +67,8 @@ function showAIToast(message, type) {
     }
     
     toast.style.display = "block";
-    // Độ trễ nhỏ để CSS Transition kịp nhận diện hiệu ứng Fade-in
     setTimeout(() => { toast.style.opacity = "1"; }, 10);
     
-    // Tự động mờ dần và ẩn đi sau 4 giây
     setTimeout(() => {
         toast.style.opacity = "0";
         setTimeout(() => { toast.style.display = "none"; }, 300);
@@ -175,7 +172,6 @@ function runAIAssistant() {
                 }
             }
 
-            // Gọi hàm hiển thị thông báo thay vì dùng alert
             if (updatedCount > 0) {
                 showAIToast("✅ <b>Hoàn tất tính toán!</b><br>Đã điền kết quả tự động cho " + updatedCount + " cán bộ.", "success");
             } else {
@@ -183,7 +179,6 @@ function runAIAssistant() {
             }
 
         } catch (error) {
-            // Hiển thị lỗi màu đỏ nếu xảy ra sự cố
             showAIToast("❌ <b>Hệ thống gặp sự cố:</b><br>" + error.message, "error");
         } finally {
             if (btn) {
@@ -240,7 +235,7 @@ function ghiKetQuaAI() {
     btn.innerHTML = "⏳ Đang ghi...";
     btn.disabled = true;
 
-    khachApi.ghiKetQuaThop(duLieuGhi, function(kqra) {
+    window.khachApi.ghiKetQuaThop(duLieuGhi, function(kqra) {
         showAIToast("✅ <b>Ghi kết quả thành công!</b><br>" + kqra.tbao, "success");
         btn.innerHTML = originalText;
         btn.disabled = false;
