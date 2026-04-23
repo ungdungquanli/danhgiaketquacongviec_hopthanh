@@ -191,7 +191,7 @@ function runAIAssistant() {
 }
 
 /* ==========================================================================
-   HÀM THÊM MỚI: GHI KẾT QUẢ ĐÃ TÍNH TOÁN LÊN MÁY CHỦ
+   HÀM BỔ SUNG: GHI KẾT QUẢ ĐÃ TÍNH TOÁN LÊN MÁY CHỦ
    ========================================================================== */
 function ghiKetQuaAI() {
     let table = document.getElementById("bangThop");
@@ -209,7 +209,7 @@ function ghiKetQuaAI() {
         let htmlKq = tds[2];
         let xepLoai = "";
         
-        // Trích xuất văn bản kết quả bỏ qua HTML
+        // Trích xuất văn bản kết quả bỏ qua định dạng HTML màu sắc
         if (htmlKq.innerText.trim() !== "") {
             let theSpan = htmlKq.getElementsByTagName("span");
             if (theSpan.length > 0) {
@@ -219,7 +219,7 @@ function ghiKetQuaAI() {
             }
         }
         
-        // Chỉ lấy các dòng đã có kết quả
+        // Chỉ ghi các hồ sơ đã có kết quả
         if (hoTen && xepLoai && xepLoai !== "-" && xepLoai !== "Chưa có" && xepLoai !== "") {
             duLieuGhi.push({ tenn: hoTen, kq: xepLoai });
         }
@@ -235,6 +235,7 @@ function ghiKetQuaAI() {
     btn.innerHTML = "⏳ Đang ghi...";
     btn.disabled = true;
 
+    // Chú ý: Dùng window.khachApi để không bị lỗi không tìm thấy định danh
     window.khachApi.ghiKetQuaThop(duLieuGhi, function(kqra) {
         showAIToast("✅ <b>Ghi kết quả thành công!</b><br>" + kqra.tbao, "success");
         btn.innerHTML = originalText;
