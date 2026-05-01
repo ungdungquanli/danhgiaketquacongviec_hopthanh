@@ -26,6 +26,7 @@
         <button id="btnCapNhatChung" class="btn btn-warning btn-sm fw-bold ms-3 shadow-sm" style="display:none;" onclick="gvCapNhatNhiemVuChung()"><i class="bi bi-pencil-square"></i> Cập nhật nhiệm vụ chung</button>
       </div>
       <div class="hopLoc">
+        <button id="gvNutChth" class="btn btn-danger btn-sm fw-bold nhapTuyChinh" style="color: white; border: none; padding: 4px 10px; display: flex; align-items: center;" onclick="gvXlmChth(this)">Chuyển tháng mới</button>
         <select id="gvLocNam" class="form-select nhapTuyChinh" style="width: 140px;">
           <option value="2024-2025">2024-2025</option><option value="2025-2026" selected>2025-2026</option><option value="2026-2027">2026-2027</option>
         </select>
@@ -188,9 +189,6 @@
             let tchon = (ngnthH === 'ALL' || ngnthH === '-TOÀN TRƯỜNG-') ? "selected" : ""; 
             lchon += `<option value="ALL" style="font-weight:bold; color:blue;" ${tchon}>-TOÀN TRƯỜNG-</option>`; 
         }
-        if (!dcb) { 
-            lchon += `<option value="DELETE" style="font-weight:bold; color:red;">-CHUYỂN THÁNG MỚI-</option>`; 
-        }
         
         dsCanbgv.forEach(s => { 
             let chon = (ngnth === s.ttrg || ngnth === s.tenn) ? "selected" : ""; 
@@ -211,7 +209,6 @@
         
         const cv = (bltd === "Cho vượt tiến độ") ? "selected" : "";
         
-        // Cập nhật: Thêm sự kiện onkeyup="gvDinhDangNgay(this, event)" cho ô nhập Thời gian HT (oNgayGv)
         tr.innerHTML = `<td class="oHdong">${btnxoa}</td><td class="text-center"><input type="text" class="form-control text-center oSttGv" value="${bstt}" readonly></td><td><textarea class="form-control oNdGv" placeholder="Nhập nội dung..." oninput="gvCoDan(this)"></textarea></td><td><textarea class="form-control text-center oNgayGv" placeholder="dd/mm/yyyy" oninput="gvCoDan(this)" onkeyup="gvDinhDangNgay(this, event)"></textarea></td><td><select class="form-select oTdoGv" ${dcb}><option value="">--Chọn--</option><option value="Cho vượt tiến độ" ${cv}>Cho vượt tiến độ</option></select></td><td><select class="form-select oNnghanGv" onchange="gvDoiNgn(this)" ${dcb}>${lchon}</select></td><td><textarea class="form-control text-center oGchuGv" placeholder="Ghi chú" oninput="gvCoDan(this)"></textarea></td>`; 
         
         tr.querySelector('.oNdGv').value = bnd;
@@ -226,10 +223,9 @@
         ptu.style.height = (ptu.scrollHeight) + 'px'; 
     }
 
-    // Bổ sung: Hàm tự động định dạng ngày tháng khi gõ phím
     function gvDinhDangNgay(ptu, e) {
-        if (e && (e.which === 8 || e.which === 46)) return; // Bỏ qua nếu người dùng bấm Backspace hoặc Delete
-        let v = ptu.value.replace(/\D/g, ''); // Xóa toàn bộ ký tự không phải là số
+        if (e && (e.which === 8 || e.which === 46)) return;
+        let v = ptu.value.replace(/\D/g, ''); 
         if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2);
         if (v.length > 5) v = v.substring(0, 5) + '/' + v.substring(5, 9);
         ptu.value = v;
@@ -286,25 +282,6 @@
             trangngnhan: gt, 
             tenngnhan: tngn 
         };
-        
-        if (gth === 'DELETE') { 
-            const oThang = document.getElementById('gvLocThang');
-            const vtThang = oThang.selectedIndex;
-            
-            const thangCu = oThang.value;
-            if (vtThang < oThang.options.length - 1) {
-                oThang.selectedIndex = vtThang + 1;
-            } else {
-                oThang.selectedIndex = 0; 
-            }
-            const thangMoi = oThang.value;
-
-            tdtaiXoaCho = { nam: nm, thang: thangMoi, nviec: nvx, thangCu: thangCu }; 
-            ptuChoXoa = ptu; 
-            const hmc = new bootstrap.Modal(document.getElementById('gvHopThoaiXoa')); 
-            hmc.show(); 
-            return; 
-        }
         
         const th_htai = document.getElementById('gvLocThang').value;
         let tbht = (gth === 'ALL') ? "🚀 Đang giao cho TOÀN TRƯỜNG 🚀" : "⏳ Đang gửi cho " + tngn + "...";
@@ -366,6 +343,36 @@
         ghiTungDong(0);
     }
 
+    function gvXlmChth(btn) {
+        const nm = document.getElementById('gvLocNam').value;
+        const oThang = document.getElementById('gvLocThang');
+        const vtThang = oThang.selectedIndex;
+        
+        const thangCu = oThang.value;
+        if (vtThang < oThang.options.length - 1) {
+            oThang.selectedIndex = vtThang + 1;
+        } else {
+            oThang.selectedIndex = 0; 
+        }
+        const thangMoi = oThang.value;
+
+        const nvx = { 
+            stt: "0", 
+            ndung: "Chuyển tháng", 
+            hchot: "", 
+            tdo: "", 
+            gchu: "", 
+            ngnhan: "DELETE", 
+            trangngnhan: "DELETE", 
+            tenngnhan: "DELETE" 
+        };
+
+        tdtaiXoaCho = { nam: nm, thang: thangMoi, nviec: nvx, thangCu: thangCu }; 
+        ptuChoXoa = btn; 
+        const hmc = new bootstrap.Modal(document.getElementById('gvHopThoaiXoa')); 
+        hmc.show(); 
+    }
+
     function gvXndongXoa() { 
         const hmc = document.getElementById('gvHopThoaiXoa');
         const modal = bootstrap.Modal.getInstance(hmc); 
@@ -379,7 +386,7 @@
     }
 
     function gvHuyXoa() { 
-        if (ptuChoXoa) { 
+        if (ptuChoXoa && ptuChoXoa.tagName !== 'BUTTON') { 
             ptuChoXoa.value = ""; 
         } 
         if (tdtaiXoaCho && tdtaiXoaCho.thangCu) {
@@ -405,7 +412,7 @@
                     } 
                 } else { 
                     gvTbaoNhanh('loi', "Lỗi Server: " + (kq ? kq.tbao : "Unkown")); 
-                    ptu.value = ""; 
+                    if (ptu.tagName !== 'BUTTON') ptu.value = ""; 
                 }
             }, 
             function(l) { 
