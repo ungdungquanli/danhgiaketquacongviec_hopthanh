@@ -1,16 +1,17 @@
 <style>
   .hopDau { background-color: #e9ecef; padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; border: 1px solid #ced4da; }
   .loGo { font-weight: bold; color: #0d6efd; text-transform: uppercase; font-size: 14px; }
-  .tDe { font-weight: bold; color: #dc3545; font-size: 20px; text-align: center; text-transform: uppercase; margin: 0; }
+  .tDe { font-weight: bold; color: #dc3545; font-size: 20px; text-transform: uppercase; margin: 0; }
   .nhanNhiemVu { font-weight: bold; color: #333; font-size: 14px; }
   .chuThongTin { font-weight: bold; color: #0d6efd; font-size: 15px; margin-left: 5px; }
   .nhapTuyChinh { border: 1px solid #ced4da; border-radius: 4px; padding: 2px; outline: none; height: 30px; font-size: 14px; }
   .epMotDong { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
 
+  #bangNviec { table-layout: fixed; width: 100%; word-wrap: break-word; }
   #bangNviec thead th { position: sticky; top: 0; z-index: 10; background-color: #0d6efd !important; color: white !important; vertical-align: middle; text-align: center; padding: 8px 5px; }
   #bangNviec textarea.form-control { border: none; background-color: transparent; resize: none; overflow: hidden; min-height: 35px; line-height: 1.3; white-space: pre-wrap; padding: 4px; box-shadow: none; cursor: default; }
   #bangNviec .nhapNgay, #bangNviec .chonKq { border: none; background: transparent; box-shadow: none; width: 100%; text-align: center; height: 30px; }
-  #bangNviec td { vertical-align: middle !important; padding: 1px 2px !important; border-color: #f2f2f2 !important; }
+  #bangNviec td { vertical-align: middle !important; padding: 1px 2px !important; border-color: #f2f2f2 !important; overflow: hidden; text-overflow: ellipsis; }
 
   .diemCong, .diemCong:disabled { background-color: #0d6efd !important; color: white !important; font-weight: bold; opacity: 1 !important; -webkit-text-fill-color: white !important; }
   .diemTru, .diemTru:disabled { background-color: #dc3545 !important; color: white !important; font-weight: bold; opacity: 1 !important; -webkit-text-fill-color: white !important; }
@@ -22,10 +23,14 @@
 </style>
 
 <div class="hopDau">
-  <div class="row align-items-center mb-1">
-   <div class="col-md-6 tDe text-center">NHIỆM VỤ CỦA TÔI</div>
-    <div class="col-md-3 ps-3 text-nowrap text-end"> 
-      <div class="d-inline-block"><label class="me-1 fw-bold nhanNhiemVu" style="font-size:13px;">Điểm cộng/trừ:</label><input type="number" id="nhapDiemThuong" oninput="capnhTdong()" class="nhapTuyChinh text-center fw-bold diemKhong" style="width: 50px; display:inline-block;" value="0"></div>
+  <!-- KHU VỰC ĐÃ CẬP NHẬT: Header dùng Flexbox chia 3 cột để căn giữa chuẩn xác tiêu đề và đẩy Điểm thưởng sát mép phải -->
+  <div class="d-flex align-items-center mb-1 w-100 position-relative">
+    <div style="flex: 1;"></div>
+    <div class="tDe text-center" style="flex: 2;">NHIỆM VỤ CỦA TÔI</div>
+    <div class="text-end" style="flex: 1;"> 
+      <div class="d-inline-block">
+         <label class="me-1 fw-bold nhanNhiemVu" style="font-size:13px;">Điểm cộng/trừ:</label><input type="number" id="nhapDiemThuong" oninput="capnhTdong()" class="nhapTuyChinh text-center fw-bold diemKhong" style="width: 50px; display:inline-block;" value="0">
+      </div>
     </div>
   </div>
   
