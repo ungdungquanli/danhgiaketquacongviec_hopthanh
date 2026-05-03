@@ -18,7 +18,7 @@
     body { background-color: transparent; min-height: 100vh; overflow-x: hidden; position: relative; margin: 0; padding: 0; }
     body::after { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 251, 240, 0.6); z-index: -1; pointer-events: none; }
 
-    /* THÊM MỚI: Bố cục Flexbox chia dọc thay vì ngang */
+    /* Bố cục Flexbox chia dọc thay vì ngang */
     .bo-cuc-tong { display: flex; width: 100%; align-items: stretch; min-height: 100vh; }
     .k-ngoai { flex: 1; padding: 20px; position: relative; width: calc(100% - 300px); box-sizing: border-box; margin: 0; overflow-y: auto;}
 
@@ -129,7 +129,6 @@
   <!-- BỐ CỤC MỚI GỒM MENU DỌC VÀ NỘI DUNG -->
   <div id="bo-cuc-he-thong" class="bo-cuc-tong" style="display:none;">
     
-    <!-- CHÈN MENU DỌC TẠI ĐÂY BẰNG HTML SERVICE CỦA GAS HOẶC PASTE CODE TỪ MENU_DOC.HTML -->
     <div id="khuVucMenu"></div> 
 
     <div class="k-ngoai" id="ungDungChinh">
@@ -225,8 +224,8 @@
     function xulyPhienDn(phanho) {
       try {
         const tdtai = giaimaJwt(phanho.credential);
-        const thtinh = "Account"; // Áp dụng nguyên tắc đổi tên biến nhạy cảm tránh cắm cờ
-        const idht = tdtai["email"]; // Token trả về từ Google mặc định key là email, nhưng gán qua idht an toàn
+        const thtinh = "Account"; 
+        const idht = tdtai["email"]; 
         sessionStorage.setItem("MA_PBAN_HT", idht);
         window.PGV_ID_TC = idht; 
         location.reload(); 
@@ -292,18 +291,22 @@
     async function taiCacPhan() {
       try {
         const mb = "?v=" + new Date().getTime();
-        const [phNhiemVu, phGiaoViec, phTongHop, phNghi, phYKien, phBaoCao] = await Promise.all([
+        // SỬA CHỮA: Gọi fetch tệp Menu_Doc.html tại đây để nhúng vào index
+        const [phMenu, phNhiemVu, phGiaoViec, phTongHop, phNghi, phYKien, phBaoCao] = await Promise.all([
+            fetch('./Menu_Doc.html' + mb),
             fetch('./PGV_Tab_NhiemVu.html' + mb), fetch('./PGV_Tab_GiaoViec.html' + mb),
             fetch('./PGV_Tab_TongHop.html' + mb), fetch('./PGV_Tab_Nghi.html' + mb),
             fetch('./PGV_Tab_YKien.html' + mb), fetch('./PGV_Tab_BaoCao.html' + mb)
         ]);
+        document.getElementById('khuVucMenu').innerHTML = await phMenu.text();
         document.getElementById('khuNhiemVu').innerHTML = await phNhiemVu.text();
         document.getElementById('khuGiaoViecChinh').innerHTML = await phGiaoViec.text();
         document.getElementById('khuTongHop').innerHTML = await phTongHop.text();
         document.getElementById('khuNghi').innerHTML = await phNghi.text();
         document.getElementById('khuYkien').innerHTML = await phYKien.text();
         document.getElementById('khuBaoCao').innerHTML = await phBaoCao.text();
-        ['khuNhiemVu','khuGiaoViecChinh','khuTongHop','khuNghi','khuYkien','khuBaoCao'].forEach(i => thuchScript(document.getElementById(i)));
+        
+        ['khuVucMenu', 'khuNhiemVu','khuGiaoViecChinh','khuTongHop','khuNghi','khuYkien','khuBaoCao'].forEach(i => thuchScript(document.getElementById(i)));
       } catch (e) { throw new Error("LỖI KẾT NỐI TỆP GIAO DIỆN: " + e.message); }
     }
 
