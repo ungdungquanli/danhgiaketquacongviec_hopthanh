@@ -3,7 +3,7 @@
     :root { --mau-c: #0056b3; --mau-n: transparent; --mau-t: #333333; }
     
     .khung-trai { 
-        width: 350px; flex-shrink: 0; display: flex; flex-direction: column; 
+        width: 300px; flex-shrink: 0; display: flex; flex-direction: column; 
         align-items: center; padding-top: 25px; position: sticky; top: 0; 
         height: 100vh; background-color: var(--mau-c); padding-bottom: 25px; 
         box-shadow: 4px 0 10px rgba(0,0,0,0.15); box-sizing: border-box; 
@@ -27,12 +27,13 @@
     }
     
     .dong-tt-1 { 
-        display: flex; align-items: center; border-bottom: 1px dashed #ced4da; 
-        padding-bottom: 8px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        display: flex; align-items: center; padding-bottom: 4px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .dong-tt-mid { 
+        display: flex; align-items: center; border-bottom: 1px dashed #ced4da; padding-bottom: 8px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .tt-nhan { font-weight: bold; color: #333; margin-right: 5px; }
     .tt-giatri { color: #0d6efd; font-weight: bold; text-transform: uppercase; }
-    .tt-phan-cach { color: #ccc; margin: 0 8px; font-weight: 300;}
     .tt-trangthai { color: #0d6efd; font-weight: bold; text-transform: uppercase; }
     
     .dong-tt-2 { font-size: 15px; display: flex; align-items: baseline; }
@@ -67,7 +68,9 @@
        <div class="dong-tt-1">
          <span class="tt-nhan">Giáo viên:</span>
          <span class="tt-giatri" id="chuTenGv">Đang tải...</span>
-         <span class="tt-phan-cach">|</span>
+       </div>
+       <div class="dong-tt-mid">
+         <span class="tt-nhan">Trạng thái:</span>
          <span class="tt-trangthai" id="chuTrangThai">...</span>
        </div>
        <div class="dong-tt-2">
