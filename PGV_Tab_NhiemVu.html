@@ -24,13 +24,13 @@
 
 <div class="hopDau">
   <div class="d-flex align-items-center mb-1 w-100 position-relative">
-    <!-- Cập nhật: Thêm class text-nowrap để chống bẻ dòng và tăng flex lên 1.5 -->
+    <!-- Cập nhật: Thêm text-nowrap để tránh rớt dòng, chỉnh flex thành 1.5 -->
     <div class="text-nowrap" style="flex: 1.5;">
       <span class="nhanNhiemVu">Thời gian:</span><span id="chuThoiGian" class="chuThongTin me-3">...</span>
       <span class="nhanNhiemVu border-start ps-3">Năm học:</span><span id="chuNamHoc" class="chuThongTin">...</span>
     </div>
     <div class="tDe text-center text-nowrap" style="flex: 2;">NHIỆM VỤ CỦA TÔI</div>
-    <!-- Cập nhật: Thêm class text-nowrap và tăng flex lên 1.5 để cân đối với bên trái -->
+    <!-- Cập nhật: Thêm text-nowrap để tránh rớt dòng, chỉnh flex thành 1.5 cân xứng -->
     <div class="text-end text-nowrap" style="flex: 1.5;"> 
       <div class="d-inline-block">
          <label class="me-1 fw-bold nhanNhiemVu" style="font-size:13px;">Điểm cộng/trừ:</label><input type="number" id="nhapDiemThuong" oninput="capnhTdong()" class="nhapTuyChinh text-center fw-bold diemKhong" style="width: 50px; display:inline-block;" value="0">
@@ -66,7 +66,7 @@
 <div class="card shadow-sm p-0 border-0">
   <div class="table-responsive" style="max-height: 65vh; overflow-y: auto; border: 1px solid #f0f0f0;">
     <table class="table table-bordered table-hover mb-0" id="bangNviec">
-      <thead><tr><th style="width: 3%;">TT</th><th style="width: 48%;">Nội dung công việc</th><th style="width: 15%;">Thời gian giao hoàn thành</th><th style="width: 10%;">Loại tiến độ</th><th style="width: 10%;">Kết quả</th><th style="width: 10%;">Ngày hoàn thành</th><th style="width: 3%;">Xoá</th></tr></thead>
+      <thead><tr><th style="width: 3%;">STT</th><th style="width: 48%;">Nội dung công việc</th><th style="width: 15%;">Thời gian giao hoàn thành</th><th style="width: 10%;">Loại tiến độ</th><th style="width: 10%;">Kết quả</th><th style="width: 10%;">Ngày hoàn thành</th><th style="width: 3%;">Xoá</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
