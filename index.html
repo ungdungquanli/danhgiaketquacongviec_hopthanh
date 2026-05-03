@@ -15,12 +15,12 @@
 
   <style>
     body, input, select, textarea, button, table { font-family: 'Times New Roman', Times, serif !important; font-size: 14px; }
-    body { background-color: transparent; min-height: 100vh; overflow-x: hidden; position: relative; margin: 0; padding: 0; }
+    body { background-color: transparent; min-height: 100vh; overflow: hidden; margin: 0; padding: 0; }
     body::after { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 251, 240, 0.6); z-index: -1; pointer-events: none; }
 
     /* Bố cục Flexbox chia dọc thay vì ngang */
     .bo-cuc-tong { display: flex; width: 100%; align-items: stretch; min-height: 100vh; }
-    .k-ngoai { flex: 1; padding: 5px 5px 5px 0; position: relative; width: calc(100% - 350px); box-sizing: border-box; margin: 0; overflow-y: auto;}
+    .k-ngoai { flex: 1; padding: 20px 20px 20px 0; position: relative; width: calc(100% - 300px); box-sizing: border-box; margin: 0; overflow-y: auto;}
 
     #manhChao { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f0fdf4; }
     #lopPhuTai { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); z-index: 10000; display: none; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
@@ -41,7 +41,7 @@
 
     #hopLoi { margin-top: 20px; padding: 10px; background: #ffecec; border: 1px solid #f5c6cb; color: #721c24; border-radius: 5px; max-width: 90%; z-index: 10001; position: relative; }
 
-    .tab-content { background-color: rgba(255, 255, 255, 0.95) !important; border-radius: 6px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); min-height: calc(100vh - 60px); }
+    .tab-content { background-color: rgba(255, 255, 255, 0.95) !important; border-radius: 6px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); min-height: calc(100vh - 40px); }
     .table { --bs-table-bg: transparent; }
     .bg-white { background-color: rgba(255,255,255,0.6) !important; }
 
@@ -129,6 +129,7 @@
   <!-- BỐ CỤC MỚI GỒM MENU DỌC VÀ NỘI DUNG -->
   <div id="bo-cuc-he-thong" class="bo-cuc-tong" style="display:none;">
     
+    <!-- CHÈN MENU DỌC TẠI ĐÂY BẰNG HTML SERVICE CỦA GAS HOẶC PASTE CODE TỪ MENU_DOC.HTML -->
     <div id="khuVucMenu"></div> 
 
     <div class="k-ngoai" id="ungDungChinh">
@@ -291,7 +292,6 @@
     async function taiCacPhan() {
       try {
         const mb = "?v=" + new Date().getTime();
-        // SỬA CHỮA: Gọi fetch tệp Menu_Doc.html tại đây để nhúng vào index
         const [phMenu, phNhiemVu, phGiaoViec, phTongHop, phNghi, phYKien, phBaoCao] = await Promise.all([
             fetch('./Menu_Doc.html' + mb),
             fetch('./PGV_Tab_NhiemVu.html' + mb), fetch('./PGV_Tab_GiaoViec.html' + mb),
@@ -343,7 +343,8 @@
         
         if (kq.qsuad) $('#nhapDiemThuong').prop('readonly', false); else $('#nhapDiemThuong').prop('readonly', true);
         
-        $('#chuTrangThai').text(kq.tde.tthai || ''); 
+        // CẬP NHẬT: Xử lý trạng thái nếu chưa nộp báo cáo
+        $('#chuTrangThai').text(kq.tde.tthai || 'CHƯA NỘP BÁO CÁO'); 
         $('#chuKqHthi').text(kq.tde.kq || '');
         
         if(typeof khoiTaoBoDemDiem === 'function') khoiTaoBoDemDiem(kq.tde.kq, kq.tde.dthuong);
