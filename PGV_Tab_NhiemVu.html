@@ -24,13 +24,11 @@
 
 <div class="hopDau">
   <div class="d-flex align-items-center mb-1 w-100 position-relative">
-    <!-- Cập nhật: Thêm text-nowrap để tránh rớt dòng, chỉnh flex thành 1.5 -->
     <div class="text-nowrap" style="flex: 1.5;">
       <span class="nhanNhiemVu">Thời gian:</span><span id="chuThoiGian" class="chuThongTin me-3">...</span>
       <span class="nhanNhiemVu border-start ps-3">Năm học:</span><span id="chuNamHoc" class="chuThongTin">...</span>
     </div>
     <div class="tDe text-center text-nowrap" style="flex: 2;">NHIỆM VỤ CỦA TÔI</div>
-    <!-- Cập nhật: Thêm text-nowrap để tránh rớt dòng, chỉnh flex thành 1.5 cân xứng -->
     <div class="text-end text-nowrap" style="flex: 1.5;"> 
       <div class="d-inline-block">
          <label class="me-1 fw-bold nhanNhiemVu" style="font-size:13px;">Điểm cộng/trừ:</label><input type="number" id="nhapDiemThuong" oninput="capnhTdong()" class="nhapTuyChinh text-center fw-bold diemKhong" style="width: 50px; display:inline-block;" value="0">
@@ -39,11 +37,12 @@
   </div>
 
   <div class="d-flex align-items-center mb-2 px-2 py-1 gap-2" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; min-height: 42px;">
-     <div class="d-flex align-items-center justify-content-center px-3" style="flex: 6.5;">
+     <!-- CẬP NHẬT: Thay đổi justify-content-center thành justify-content-start để căn lề trái -->
+     <div class="d-flex align-items-center justify-content-start px-3" style="flex: 6.5;">
          <span class="nhanNhiemVu me-2 text-nowrap">Số ngày nghỉ:</span><input type="number" id="nhapSngayNghi" class="nhapTuyChinh text-center me-2" style="width: 45px; font-weight: bold;" placeholder="0">
          <textarea id="nhapLdoNghi" class="form-control me-3" placeholder="Nhập lý do..." style="height: 30px; min-height: 30px; font-size: 13px; border-radius: 4px; width: 300px; resize: none; overflow: hidden; white-space: pre-wrap; padding: 4px 8px;" oninput="gdang(this)" onfocus="gdang(this)" onblur="cgon(this, '30px')"></textarea>
      </div>
-     <div class="d-flex align-items-center gap-2">
+     <div class="d-flex align-items-center justify-content-end gap-2" style="flex: 3.5; overflow: hidden;">
         <select id="hopChonGv" class="form-select form-select-sm border-primary fw-bold text-primary shadow-sm" style="width: auto; max-width: 180px; display: none; height: 30px; font-size: 12px;" disabled><option value="">-- GV --</option></select>
         <button class="btn btn-success btn-sm fw-bold d-flex align-items-center px-3" onclick="xulyLuuTam()" style="height: 30px; min-width: 80px; justify-content: center;"><i class="bi bi-save me-1"></i> Lưu nhật ký</button>
         <button id="nutNopBcao" class="btn btn-primary btn-sm fw-bold d-flex align-items-center px-3" onclick="nopBcaoChinh()" disabled style="height: 30px; min-width: 80px; justify-content: center;"><i class="bi bi-send me-1"></i> Nộp báo cáo</button>
